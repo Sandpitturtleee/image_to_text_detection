@@ -1,3 +1,5 @@
+import os
+
 import torch
 from torch.autograd import Variable
 import utils
@@ -6,8 +8,10 @@ from PIL import Image
 
 import models.crnn as crnn
 
-model_path = './data/crnn.pth'
-img_path = './data/demo.png'
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_path = CURRENT_DIR + '/data/crnn.pth'
+img_path = CURRENT_DIR + '/data/demo.png'
 alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
 
 
