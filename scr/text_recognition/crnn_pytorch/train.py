@@ -1,46 +1,86 @@
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
 
 import argparse
+# from warpctc_pytorch import CTCLoss
+import os
 import random
+
+import dataset
+import models.crnn as crnn
+import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import torch.utils.data
-from torch.autograd import Variable
-import numpy as np
-from warpctc_pytorch import CTCLoss
-import os
 import utils
-import dataset
-
-import models.crnn as crnn
+from torch.autograd import Variable
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--trainRoot', required=True, help='path to dataset')
-parser.add_argument('--valRoot', required=True, help='path to dataset')
-parser.add_argument('--workers', type=int, help='number of database loading workers', default=2)
-parser.add_argument('--batchSize', type=int, default=64, help='input batch size')
-parser.add_argument('--imgH', type=int, default=32, help='the height of the input image to network')
-parser.add_argument('--imgW', type=int, default=100, help='the width of the input image to network')
-parser.add_argument('--nh', type=int, default=256, help='size of the lstm hidden state')
-parser.add_argument('--nepoch', type=int, default=25, help='number of epochs to train for')
-parser.add_argument('--cuda', action='store_true', help='enables cuda')
-parser.add_argument('--ngpu', type=int, default=1, help='number of GPUs to use')
-parser.add_argument('--pretrained', default='', help="path to pretrained model (to continue training)")
-parser.add_argument('--alphabet', type=str, default='0123456789abcdefghijklmnopqrstuvwxyz')
-parser.add_argument('--expr_dir', default='expr', help='Where to store samples and models')
-parser.add_argument('--displayInterval', type=int, default=500, help='Interval to be displayed')
-parser.add_argument('--n_test_disp', type=int, default=10, help='Number of samples to display when test')
-parser.add_argument('--valInterval', type=int, default=500, help='Interval to be displayed')
-parser.add_argument('--saveInterval', type=int, default=500, help='Interval to be displayed')
-parser.add_argument('--lr', type=float, default=0.01, help='learning rate for Critic, not used by adadealta')
-parser.add_argument('--beta1', type=float, default=0.5, help='beta1 for adam. default=0.5')
-parser.add_argument('--adam', action='store_true', help='Whether to use adam (default is rmsprop)')
-parser.add_argument('--adadelta', action='store_true', help='Whether to use adadelta (default is rmsprop)')
-parser.add_argument('--keep_ratio', action='store_true', help='whether to keep ratio for image resize')
-parser.add_argument('--manualSeed', type=int, default=1234, help='reproduce experiemnt')
-parser.add_argument('--random_sample', action='store_true', help='whether to sample the dataset with random sampler')
+parser.add_argument("--trainRoot", required=True, help="path to dataset")
+parser.add_argument("--valRoot", required=True, help="path to dataset")
+parser.add_argument(
+    "--workers", type=int, help="number of database loading workers", default=2
+)
+parser.add_argument("--batchSize", type=int, default=64, help="input batch size")
+parser.add_argument(
+    "--imgH", type=int, default=32, help="the height of the input image to network"
+)
+parser.add_argument(
+    "--imgW", type=int, default=100, help="the width of the input image to network"
+)
+parser.add_argument("--nh", type=int, default=256, help="size of the lstm hidden state")
+parser.add_argument(
+    "--nepoch", type=int, default=25, help="number of epochs to train for"
+)
+parser.add_argument("--cuda", action="store_true", help="enables cuda")
+parser.add_argument("--ngpu", type=int, default=1, help="number of GPUs to use")
+parser.add_argument(
+    "--pretrained", default="", help="path to pretrained model (to continue training)"
+)
+parser.add_argument(
+    "--alphabet", type=str, default="0123456789abcdefghijklmnopqrstuvwxyz"
+)
+parser.add_argument(
+    "--expr_dir", default="expr", help="Where to store samples and models"
+)
+parser.add_argument(
+    "--displayInterval", type=int, default=500, help="Interval to be displayed"
+)
+parser.add_argument(
+    "--n_test_disp", type=int, default=10, help="Number of samples to display when test"
+)
+parser.add_argument(
+    "--valInterval", type=int, default=500, help="Interval to be displayed"
+)
+parser.add_argument(
+    "--saveInterval", type=int, default=500, help="Interval to be displayed"
+)
+parser.add_argument(
+    "--lr",
+    type=float,
+    default=0.01,
+    help="learning rate for Critic, not used by adadealta",
+)
+parser.add_argument(
+    "--beta1", type=float, default=0.5, help="beta1 for adam. default=0.5"
+)
+parser.add_argument(
+    "--adam", action="store_true", help="Whether to use adam (default is rmsprop)"
+)
+parser.add_argument(
+    "--adadelta",
+    action="store_true",
+    help="Whether to use adadelta (default is rmsprop)",
+)
+parser.add_argument(
+    "--keep_ratio", action="store_true", help="whether to keep ratio for image resize"
+)
+parser.add_argument("--manualSeed", type=int, default=1234, help="reproduce experiemnt")
+parser.add_argument(
+    "--random_sample",
+    action="store_true",
+    help="whether to sample the dataset with random sampler",
+)
 opt = parser.parse_args()
 print(opt)
 
@@ -63,12 +103,18 @@ if not opt.random_sample:
 else:
     sampler = None
 train_loader = torch.utils.data.DataLoader(
-    train_dataset, batch_size=opt.batchSize,
-    shuffle=True, sampler=sampler,
+    train_dataset,
+    batch_size=opt.batchSize,
+    shuffle=True,
+    sampler=sampler,
     num_workers=int(opt.workers),
-    collate_fn=dataset.alignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio=opt.keep_ratio))
+    collate_fn=dataset.alignCollate(
+        imgH=opt.imgH, imgW=opt.imgW, keep_ratio=opt.keep_ratio
+    ),
+)
 test_dataset = dataset.lmdbDataset(
-    root=opt.valroot, transform=dataset.resizeNormalize((100, 32)))
+    root=opt.valroot, transform=dataset.resizeNormalize((100, 32))
+)
 
 nclass = len(opt.alphabet) + 1
 nc = 1
@@ -80,17 +126,17 @@ criterion = CTCLoss()
 # custom weights initialization called on crnn
 def weights_init(m):
     classname = m.__class__.__name__
-    if classname.find('Conv') != -1:
+    if classname.find("Conv") != -1:
         m.weight.data.normal_(0.0, 0.02)
-    elif classname.find('BatchNorm') != -1:
+    elif classname.find("BatchNorm") != -1:
         m.weight.data.normal_(1.0, 0.02)
         m.bias.data.fill_(0)
 
 
 crnn = crnn.CRNN(opt.imgH, nc, nclass, opt.nh)
 crnn.apply(weights_init)
-if opt.pretrained != '':
-    print('loading pretrained model from %s' % opt.pretrained)
+if opt.pretrained != "":
+    print("loading pretrained model from %s" % opt.pretrained)
     crnn.load_state_dict(torch.load(opt.pretrained))
 print(crnn)
 
@@ -113,8 +159,7 @@ loss_avg = utils.averager()
 
 # setup optimizer
 if opt.adam:
-    optimizer = optim.Adam(crnn.parameters(), lr=opt.lr,
-                           betas=(opt.beta1, 0.999))
+    optimizer = optim.Adam(crnn.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
 elif opt.adadelta:
     optimizer = optim.Adadelta(crnn.parameters())
 else:
@@ -122,14 +167,15 @@ else:
 
 
 def val(net, dataset, criterion, max_iter=100):
-    print('Start val')
+    print("Start val")
 
     for p in crnn.parameters():
         p.requires_grad = False
 
     net.eval()
     data_loader = torch.utils.data.DataLoader(
-        dataset, shuffle=True, batch_size=opt.batchSize, num_workers=int(opt.workers))
+        dataset, shuffle=True, batch_size=opt.batchSize, num_workers=int(opt.workers)
+    )
     val_iter = iter(data_loader)
 
     i = 0
@@ -160,12 +206,14 @@ def val(net, dataset, criterion, max_iter=100):
             if pred == target.lower():
                 n_correct += 1
 
-    raw_preds = converter.decode(preds.data, preds_size.data, raw=True)[:opt.n_test_disp]
+    raw_preds = converter.decode(preds.data, preds_size.data, raw=True)[
+        : opt.n_test_disp
+    ]
     for raw_pred, pred, gt in zip(raw_preds, sim_preds, cpu_texts):
-        print('%-20s => %-20s, gt: %-20s' % (raw_pred, pred, gt))
+        print("%-20s => %-20s, gt: %-20s" % (raw_pred, pred, gt))
 
     accuracy = n_correct / float(max_iter * opt.batchSize)
-    print('Test loss: %f, accuray: %f' % (loss_avg.val(), accuracy))
+    print("Test loss: %f, accuray: %f" % (loss_avg.val(), accuracy))
 
 
 def trainBatch(net, criterion, optimizer):
@@ -199,8 +247,10 @@ for epoch in range(opt.nepoch):
         i += 1
 
         if i % opt.displayInterval == 0:
-            print('[%d/%d][%d/%d] Loss: %f' %
-                  (epoch, opt.nepoch, i, len(train_loader), loss_avg.val()))
+            print(
+                "[%d/%d][%d/%d] Loss: %f"
+                % (epoch, opt.nepoch, i, len(train_loader), loss_avg.val())
+            )
             loss_avg.reset()
 
         if i % opt.valInterval == 0:
@@ -209,4 +259,6 @@ for epoch in range(opt.nepoch):
         # do checkpointing
         if i % opt.saveInterval == 0:
             torch.save(
-                crnn.state_dict(), '{0}/netCRNN_{1}_{2}.pth'.format(opt.expr_dir, epoch, i))
+                crnn.state_dict(),
+                "{0}/netCRNN_{1}_{2}.pth".format(opt.expr_dir, epoch, i),
+            )

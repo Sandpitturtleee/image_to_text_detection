@@ -1,31 +1,28 @@
-import os
-
-import torch
-from torch.autograd import Variable
-import utils
 import dataset
-from PIL import Image
-
 import models.crnn as crnn
+import torch
+import utils
+from PIL import Image
+from torch.autograd import Variable
 
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+from definitions import ROOT_DIR
 
-model_path = CURRENT_DIR + '/data/crnn.pth'
-img_path = CURRENT_DIR + '/data/demo.png'
-alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
+model_path = ROOT_DIR + "/scr/text_recognition/crnn_pytorch/data/crnn.pth"
+# img_path = CURRENT_DIR + '/data/demo.png'
+alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
 
 
-def demo():
+def recognize_text(img_path: str) -> str:
     model = crnn.CRNN(32, 1, 37, 256)
     if torch.cuda.is_available():
         model = model.cuda()
-    print('loading pretrained model from %s' % model_path)
+
     model.load_state_dict(torch.load(model_path))
 
     converter = utils.strLabelConverter(alphabet)
 
     transformer = dataset.resizeNormalize((100, 32))
-    image = Image.open(img_path).convert('L')
+    image = Image.open(img_path).convert("L")
     image = transformer(image)
     if torch.cuda.is_available():
         image = image.cuda()
@@ -40,5 +37,7 @@ def demo():
 
     preds_size = Variable(torch.IntTensor([preds.size(0)]))
     raw_pred = converter.decode(preds.data, preds_size.data, raw=True)
-    sim_pred = converter.decode(preds.data, preds_size.data, raw=False)
-    print('%-20s => %-20s' % (raw_pred, sim_pred))
+    sim_pred = converter.decode(
+        preds.data, preds_size.data, raw=False
+    )  # print('%-20s => %-20s' % (raw_pred, sim_pred))
+    return sim_pred

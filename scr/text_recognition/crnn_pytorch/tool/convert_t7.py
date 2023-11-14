@@ -1,42 +1,42 @@
-import torchfile
 import argparse
-import torch
-from torch.nn.parameter import Parameter
-import numpy as np
-import models.crnn as crnn
 
+import models.crnn as crnn
+import numpy as np
+import torch
+import torchfile
+from torch.nn.parameter import Parameter
 
 layer_map = {
-    'SpatialConvolution': 'Conv2d',
-    'SpatialBatchNormalization': 'BatchNorm2d',
-    'ReLU': 'ReLU',
-    'SpatialMaxPooling': 'MaxPool2d',
-    'SpatialAveragePooling': 'AvgPool2d',
-    'SpatialUpSamplingNearest': 'UpsamplingNearest2d',
-    'View': None,
-    'Linear': 'linear',
-    'Dropout': 'Dropout',
-    'SoftMax': 'Softmax',
-    'Identity': None,
-    'SpatialFullConvolution': 'ConvTranspose2d',
-    'SpatialReplicationPadding': None,
-    'SpatialReflectionPadding': None,
-    'Copy': None,
-    'Narrow': None,
-    'SpatialCrossMapLRN': None,
-    'Sequential': None,
-    'ConcatTable': None,  # output is list
-    'CAddTable': None,  # input is list
-    'Concat': None,
-    'TorchObject': None,
-    'LstmLayer': 'LSTM',
-    'BiRnnJoin': 'Linear'
+    "SpatialConvolution": "Conv2d",
+    "SpatialBatchNormalization": "BatchNorm2d",
+    "ReLU": "ReLU",
+    "SpatialMaxPooling": "MaxPool2d",
+    "SpatialAveragePooling": "AvgPool2d",
+    "SpatialUpSamplingNearest": "UpsamplingNearest2d",
+    "View": None,
+    "Linear": "linear",
+    "Dropout": "Dropout",
+    "SoftMax": "Softmax",
+    "Identity": None,
+    "SpatialFullConvolution": "ConvTranspose2d",
+    "SpatialReplicationPadding": None,
+    "SpatialReflectionPadding": None,
+    "Copy": None,
+    "Narrow": None,
+    "SpatialCrossMapLRN": None,
+    "Sequential": None,
+    "ConcatTable": None,  # output is list
+    "CAddTable": None,  # input is list
+    "Concat": None,
+    "TorchObject": None,
+    "LstmLayer": "LSTM",
+    "BiRnnJoin": "Linear",
 }
 
 
 def torch_layer_serial(layer, layers):
     name = layer[0]
-    if name == 'nn.Sequential' or name == 'nn.ConcatTable':
+    if name == "nn.Sequential" or name == "nn.ConcatTable":
         tmp_layers = []
         for sub_layer in layer[1]:
             torch_layer_serial(sub_layer, tmp_layers)
@@ -67,15 +67,19 @@ def trans_pos(param, part_indexes, dim=0):
 
 
 def load_params(py_layer, t7_layer):
-    if type(py_layer).__name__ == 'LSTM':
+    if type(py_layer).__name__ == "LSTM":
         # LSTM
         all_weights = []
         num_directions = 2 if py_layer.bidirectional else 1
         for i in range(py_layer.num_layers):
             for j in range(num_directions):
-                suffix = '_reverse' if j == 1 else ''
-                weights = ['weight_ih_l{}{}', 'bias_ih_l{}{}',
-                           'weight_hh_l{}{}', 'bias_hh_l{}{}']
+                suffix = "_reverse" if j == 1 else ""
+                weights = [
+                    "weight_ih_l{}{}",
+                    "bias_ih_l{}{}",
+                    "weight_hh_l{}{}",
+                    "bias_hh_l{}{}",
+                ]
                 weights = [x.format(i, suffix) for x in weights]
                 all_weights += weights
 
@@ -85,17 +89,17 @@ def load_params(py_layer, t7_layer):
         params = [trans_pos(p, [0, 1, 3, 2], dim=0) for p in params]
     else:
         all_weights = []
-        name = t7_layer[0].split('.')[-1]
-        if name == 'BiRnnJoin':
+        name = t7_layer[0].split(".")[-1]
+        if name == "BiRnnJoin":
             weight_0, bias_0, weight_1, bias_1 = t7_layer[1]
             weight = np.concatenate((weight_0, weight_1), axis=1)
             bias = bias_0 + bias_1
             t7_layer[1] = [weight, bias]
-            all_weights += ['weight', 'bias']
-        elif name == 'SpatialConvolution' or name == 'Linear':
-            all_weights += ['weight', 'bias']
-        elif name == 'SpatialBatchNormalization':
-            all_weights += ['weight', 'bias', 'running_mean', 'running_var']
+            all_weights += ["weight", "bias"]
+        elif name == "SpatialConvolution" or name == "Linear":
+            all_weights += ["weight", "bias"]
+        elif name == "SpatialBatchNormalization":
+            all_weights += ["weight", "bias", "running_mean", "running_var"]
 
         params = t7_layer[1]
 
@@ -108,8 +112,7 @@ def load_params(py_layer, t7_layer):
         try:
             item.copy_(t7_param)
         except RuntimeError:
-            print('Size not match between %s and %s' %
-                  (item.size(), t7_param.size()))
+            print("Size not match between %s and %s" % (item.size(), t7_param.size()))
 
 
 def torch_to_pytorch(model, t7_file, output):
@@ -126,14 +129,14 @@ def torch_to_pytorch(model, t7_file, output):
     for i, py_layer in enumerate(py_layers):
         py_name = type(py_layer).__name__
         t7_layer = t7_layers[j]
-        t7_name = t7_layer[0].split('.')[-1]
+        t7_name = t7_layer[0].split(".")[-1]
         if layer_map[t7_name] != py_name:
-            raise RuntimeError('%s does not match %s' % (py_name, t7_name))
+            raise RuntimeError("%s does not match %s" % (py_name, t7_name))
 
-        if py_name == 'LSTM':
+        if py_name == "LSTM":
             n_layer = 2 if py_layer.bidirectional else 1
             n_layer *= py_layer.num_layers
-            t7_layer = t7_layers[j:j + n_layer]
+            t7_layer = t7_layers[j : j + n_layer]
             j += n_layer
         else:
             j += 1
@@ -144,22 +147,20 @@ def torch_to_pytorch(model, t7_file, output):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description='Convert torch t7 model to pytorch'
-    )
+    parser = argparse.ArgumentParser(description="Convert torch t7 model to pytorch")
     parser.add_argument(
-        '--model_file',
-        '-m',
+        "--model_file",
+        "-m",
         type=str,
         required=True,
-        help='torch model file in t7 format'
+        help="torch model file in t7 format",
     )
     parser.add_argument(
-        '--output',
-        '-o',
+        "--output",
+        "-o",
         type=str,
         default=None,
-        help='output file name prefix, xxx.py xxx.pth'
+        help="output file name prefix, xxx.py xxx.pth",
     )
     args = parser.parse_args()
 
