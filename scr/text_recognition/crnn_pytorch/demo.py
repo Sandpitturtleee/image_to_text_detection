@@ -8,8 +8,7 @@ from torch.autograd import Variable
 from definitions import ROOT_DIR
 
 model_path = ROOT_DIR + "/scr/text_recognition/crnn_pytorch/data/crnn.pth"
-# img_path = CURRENT_DIR + '/data/demo.png'
-alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
+alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 def recognize_text(img_path: str) -> str:
