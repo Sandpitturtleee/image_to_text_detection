@@ -1,9 +1,0 @@
-lmdb
-numpy
-Pillow
-six
-torch
-torchvision
-black
-isort
-ruff
