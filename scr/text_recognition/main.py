@@ -3,10 +3,7 @@ from pathlib import Path
 
 from demo import recognize_text
 
-from definitions import ROOT_DIR
-
-RAW_IMAGES_DIR = ROOT_DIR + "/database/raw_images/"
-RESULTS_TXT_DIR = ROOT_DIR + "/database/results_txt/"
+from definitions import RESULTS_TXT_DIR, CUT_IMAGES_DIR
 
 
 def save_to_txt(result: str, file: str):
@@ -18,8 +15,8 @@ def save_to_txt(result: str, file: str):
 
 
 def detect_and_save_to_file():
-    for file in os.listdir(RAW_IMAGES_DIR):
-        result = recognize_text(img_path=RAW_IMAGES_DIR + file)
+    for file in os.listdir(CUT_IMAGES_DIR):
+        result = recognize_text(img_path=CUT_IMAGES_DIR + file)
         save_to_txt(result=result, file=file)
 
 

@@ -16,7 +16,7 @@ Put the downloaded model file ``crnn.pth`` into directory ``data/``. Then launch
 The demo reads an example image and recognizes its text content.
 
 Example image:
-![Example Image](../../../database/raw_images/demo.png)
+![Example Image](../../../database/cut_images/demo.png)
 
 Expected output:
     loading pretrained model from ./data/crnn.pth
