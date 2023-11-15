@@ -3,7 +3,7 @@ from pathlib import Path
 
 from demo import recognize_text
 
-from definitions import RESULTS_TXT_DIR, CUT_IMAGES_DIR
+from definitions import CUT_IMAGES_DIR, RESULTS_TXT_DIR
 
 
 def save_to_txt(result: str, file: str):
