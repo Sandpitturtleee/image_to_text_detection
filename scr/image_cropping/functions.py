@@ -3,26 +3,27 @@ import os
 from pathlib import Path
 
 import cv2
+import torch
 from ultralytics import YOLO
 
 from definitions import CUT_IMAGES_DIR, RAW_IMAGES_DIR
-
-import torch
 
 
 def object_recognition_and_cropping():
     model = YOLO("yolov8n.pt")
     for file in os.listdir(RAW_IMAGES_DIR):
-        results = model(RAW_IMAGES_DIR + file,device="mps")
+        results = model(RAW_IMAGES_DIR + file, device="mps")
         classes_names = get_cropped_images_names(model=model, results=results)
         crop_images(file=file, results=results, classes_names=classes_names)
 
+
 def train_model(dataset_path: str):
     # Load a model
-    model = YOLO('yolov8n.pt')  # load a pretrained model (recommended for training)
+    model = YOLO("yolov8n.pt")  # load a pretrained model (recommended for training)
 
     # Train the model with 2 GPUs
-    results = model.train(data=dataset_path, epochs=100, imgsz=640, device='mps')
+    results = model.train(data=dataset_path, epochs=100, imgsz=640, device="mps")
+
 
 def crop_images(file: str, results: list, classes_names: list):
     # Load the original image

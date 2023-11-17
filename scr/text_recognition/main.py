@@ -1,12 +1,12 @@
 import os
 from pathlib import Path
 
+import easyocr
+from demo import recognize_text
 from matplotlib import pyplot as plt
 
-from demo import recognize_text
-
 from definitions import CUT_IMAGES_DIR, RESULTS_TXT_DIR
-import easyocr
+
 
 def save_to_txt(result: str, file: str):
     file_name = Path(file).stem
@@ -21,12 +21,12 @@ def detect_and_save_to_file():
         result = recognize_text(img_path=CUT_IMAGES_DIR + file)
         save_to_txt(result=result, file=file)
 
-import keras_ocr
 
+import keras_ocr
 
 if __name__ == "__main__":
     print()
-    #detect_and_save_to_file()
+    # detect_and_save_to_file()
 
     # pipeline = keras_ocr.pipeline.Pipeline()
     # images = [
