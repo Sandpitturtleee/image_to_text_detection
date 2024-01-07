@@ -1,5 +1,8 @@
 import os
 
+"""
+    File used for storing in one place global variables for easier accessibility and better order
+"""
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Detection
