@@ -1,6 +1,0 @@
-lmdb
-numpy
-Pillow
-six
-torch
-torchvision
