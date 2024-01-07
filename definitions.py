@@ -6,14 +6,14 @@ import os
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Detection
-CUT_IMAGES_DIR = ROOT_DIR + "/database/detect/cut_images/"
-RAW_IMAGES_DIR = ROOT_DIR + "/database/detect/raw_images/"
-CUT_CLASSES_IMAGES_DIR = ROOT_DIR + "/database/detect/cut_classes_images/"
-RESULTS_TXT_DIR = ROOT_DIR + "/database/detect/results_txt/"
+NEWSPAPERS_DIR = ROOT_DIR + "/database/detect/1_newspapers/"
+PAGES_DIR = ROOT_DIR + "/database/detect/2_pages/"
+ARTICLES_DIR = ROOT_DIR + "/database/detect/3_articles/"
+ARTICLES_CROPPED_DIR = ROOT_DIR + "/database/detect/4_articles_cropped/"
+RESULTS_DIR = ROOT_DIR + "/database/detect/5_results/"
 
 # Training
 POPPLER_PATH = "/opt/homebrew/opt/poppler/bin"
 
 TRAIN_DATASET_PATH = ROOT_DIR + "/database/train/datasets/"
-TRAIN_PDF_DIR = ROOT_DIR + "/database/train/raw_files/pdf/"
-TRAIN_IMAGES_DIR = ROOT_DIR + "/database/train/raw_files/images/"
+TRAIN_IMAGES_DIR = ROOT_DIR + "/database/train/1_newspapers/images/"

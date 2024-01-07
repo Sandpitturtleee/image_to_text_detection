@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pdf2image import convert_from_path
 
-from definitions import TRAIN_IMAGES_DIR, TRAIN_PDF_DIR, POPPLER_PATH, RAW_IMAGES_DIR
+from definitions import TRAIN_IMAGES_DIR, NEWSPAPERS_DIR, POPPLER_PATH, PAGES_DIR
 
 # pip install pdf2image
 # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -17,7 +17,7 @@ from definitions import TRAIN_IMAGES_DIR, TRAIN_PDF_DIR, POPPLER_PATH, RAW_IMAGE
 
 def convert_pdf_to_images(pdf_name: str, first_page: int, last_page: int):
     """
-        Converts a document in a pdf format to multiple png images corresponding to pages
+        Converts a document in a pdf format to multiple png images corresponding to 2_pages
 
         Parameters:
         :param pdf_name: Name to the PDF that you want to convert
@@ -28,9 +28,9 @@ def convert_pdf_to_images(pdf_name: str, first_page: int, last_page: int):
         :type last_page: int
    """
     pages = convert_from_path(
-        TRAIN_PDF_DIR + pdf_name, poppler_path=POPPLER_PATH, first_page=first_page, last_page=last_page
+        NEWSPAPERS_DIR + pdf_name, poppler_path=POPPLER_PATH, first_page=first_page, last_page=last_page
     )
-    pdf_name = Path(TRAIN_PDF_DIR + pdf_name).stem
+    pdf_name = Path(NEWSPAPERS_DIR + pdf_name).stem
     for i in range(len(pages)):
-        # Save pages as images in the pdf
-        pages[i].save(f"{RAW_IMAGES_DIR}{pdf_name}_page_{str(i)}.png", "PNG")
+        # Save 2_pages as images in the pdf
+        pages[i].save(f"{PAGES_DIR}{pdf_name}_page_{str(i)}.png", "PNG")
