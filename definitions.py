@@ -17,3 +17,8 @@ POPPLER_PATH = "/opt/homebrew/opt/poppler/bin"
 
 TRAIN_DATASET_PATH = ROOT_DIR + "/database/train/datasets/"
 TRAIN_IMAGES_DIR = ROOT_DIR + "/database/train/1_newspapers/images/"
+
+PAGES_TRAIN_IMAGES_DIR = ROOT_DIR + "/database/train/Newspaper/test/images/"
+PAGES_TRAIN_LABELS_DIR = ROOT_DIR + "/database/train/Newspaper/test/labels/"
+ARTICLES_TRAIN_IMAGES_DIR = ROOT_DIR + "/database/train/Newspaper_articles/test/images/"
+ARTICLES_TRAIN_LABELS_DIR = ROOT_DIR + "/database/train/Newspaper_articles/test/labels/"
