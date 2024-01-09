@@ -20,5 +20,9 @@ TRAIN_IMAGES_DIR = ROOT_DIR + "/database/train/1_newspapers/images/"
 
 PAGES_ANALYZE_IMAGES_DIR = ROOT_DIR + "/database/analyze/Newspaper/train/images/"
 PAGES_ANALYZE_LABELS_DIR = ROOT_DIR + "/database/analyze/Newspaper/train/labels/"
-ARTICLES_ANALYZE_IMAGES_DIR = ROOT_DIR + "/database/analyze/Newspaper_articles/train/images/"
-ARTICLES_ANALYZE_LABELS_DIR = ROOT_DIR + "/database/analyze/Newspaper_articles/train/labels/"
+ARTICLES_ANALYZE_IMAGES_DIR = (
+    ROOT_DIR + "/database/analyze/Newspaper_articles/train/images/"
+)
+ARTICLES_ANALYZE_LABELS_DIR = (
+    ROOT_DIR + "/database/analyze/Newspaper_articles/train/labels/"
+)

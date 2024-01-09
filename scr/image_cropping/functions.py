@@ -4,11 +4,18 @@ import shutil
 from pathlib import Path
 
 import cv2
+from PIL import Image
 from pdf2image import convert_from_path
 from ultralytics import YOLO
 
-from definitions import (ARTICLES_CROPPED_DIR, ARTICLES_DIR, NEWSPAPERS_DIR,
-                         PAGES_DIR, POPPLER_PATH, RESULTS_DIR)
+from definitions import (
+    ARTICLES_CROPPED_DIR,
+    ARTICLES_DIR,
+    NEWSPAPERS_DIR,
+    PAGES_DIR,
+    POPPLER_PATH,
+    RESULTS_DIR,
+)
 
 # pip install pdf2image
 # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -69,6 +76,16 @@ def crop_image(
     :param output_folder: Output folder for saving cropped images
     :type output_folder: str
     """
+
+    # # Showing image
+    # result = results[0]
+    # for box in result.boxes:
+    #     label = result.names[box.cls[0].item()]
+    #     cords = [round(x) for x in box.xyxy[0].tolist()]
+    #     prob = box.conf[0].item()
+    # im = Image.fromarray(result.plot()[:, :, ::-1])
+    # im.show()
+
     # Load the original image
     image = input_folder + file
     img = cv2.imread(image)
