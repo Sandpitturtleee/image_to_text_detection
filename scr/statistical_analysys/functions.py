@@ -8,12 +8,13 @@ from matplotlib.pyplot import show
 from pandas import DataFrame, cut
 from ultralytics import YOLO
 
+from scr.statistical_analysys.variables import area_bin_edges, area_bin_labels
 
-def detect_images_and_calculate_areas(model_name: str, img_input_path: str):
+
+def detect_images_and_calculate_areas(model_name: str, img_input_path: str,img_sizes: list):
     areas = []
     iterate = 0
     model = YOLO(model_name)
-    img_sizes = get_img_sizes(img_input_path=img_input_path)
     for file in sorted_alphanumeric(os.listdir(img_input_path)):
         results = model(img_input_path + file, device="mps")
         box = results[0].boxes.xyxy.tolist()
@@ -33,11 +34,9 @@ def detect_images_and_calculate_areas(model_name: str, img_input_path: str):
         iterate += 1
     return areas
 
-
-def load_txt_files_and_calculate_areas(txt_input_path: str, img_input_path):
+def load_txt_files_and_calculate_areas(txt_input_path: str, img_input_path,img_sizes: list):
     areas = []
     iterate = 0
-    img_sizes = get_img_sizes(img_input_path=img_input_path)
     for file in sorted_alphanumeric(os.listdir(txt_input_path)):
         bounding_boxes = read_bounding_boxes(path=txt_input_path + file)
         areas.append(
@@ -167,3 +166,16 @@ def create_bar_plot(data: list, bin_edges: list, bin_labels: list):
     )
     df["bin"].value_counts().sort_index().plot.bar()
     show()
+
+def analyze_areas(areas_txt: list, areas_img: list):
+    areas_txt,areas_img,mismatching_length = calculate_mismatched_length(areas_txt=areas_txt,areas_img=areas_img)
+    areas_txt, areas_img, mismatching_zeros = calculate_mismatched_zeros(areas_txt=areas_txt, areas_img=areas_img)
+    areas_txt = sort_nested_list(nested=areas_txt)
+    areas_img = sort_nested_list(nested=areas_img)
+    percentages = calculate_percentages(areas_txt=areas_txt,areas_img=areas_img)
+    create_bar_plot(
+        data=percentages, bin_edges=area_bin_edges, bin_labels=area_bin_labels
+    )
+    # print("Mismatching length = " + str(len(mismatching_length[0])))
+    # print("Mismatching zeros = "+str(len(mismatching_zeros[0])))
+    # print("Correct areas = " + str(len(areas_txt)))
