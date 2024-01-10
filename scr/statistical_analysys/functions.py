@@ -48,6 +48,33 @@ def load_txt_files_and_calculate_areas(txt_input_path: str, img_input_path):
 
     return areas
 
+def calculate_mismatched_length(areas_txt: list, areas_img: list):
+    mismatching_length = 0
+    mismatching_length_img = []
+    mismatching_length_txt = []
+    for item_txt, item_img in zip(areas_txt, areas_img):
+        if len(item_txt) != len(item_img):
+            mismatching_length += 1
+            mismatching_length_txt.append(item_txt)
+            mismatching_length_img.append(item_img)
+            areas_txt.remove(item_txt)
+            areas_img.remove(item_img)
+    return areas_txt,areas_img,[mismatching_length_txt,mismatching_length_img]
+
+
+def calculate_mismatched_zeros(areas_txt: list, areas_img: list):
+    mismatching_zeros = 0
+    mismatching_zeros_img = []
+    mismatching_zeros_txt = []
+    for item_txt, item_img in zip(areas_txt, areas_img):
+        if 0 in item_img:
+            mismatching_zeros +=1
+            mismatching_zeros_txt.append(item_txt)
+            mismatching_zeros_img.append(item_img)
+            areas_txt.remove(item_txt)
+            areas_img.remove(item_img)
+    return areas_txt, areas_img, [mismatching_zeros_txt, mismatching_zeros_img]
+
 
 def convert_bounding_box_to_yolo_format(
         voc_bbox: list, img_width: int, img_height: int
@@ -113,30 +140,9 @@ def sort_nested_list(nested: list):
         item.sort()
     return nested
 
-
-def calculate_mismatched_length(areas_txt: list, areas_img: list):
-    mismatching_length = 0
-    mismatching_length_img = []
-    mismatching_length_txt = []
+def calculate_percentages(areas_txt: list, areas_img: list):
+    percentages = []
     for item_txt, item_img in zip(areas_txt, areas_img):
-        if len(item_txt) != len(item_img):
-            mismatching_length += 1
-            mismatching_length_txt.append(item_txt)
-            mismatching_length_img.append(item_img)
-            areas_txt.remove(item_txt)
-            areas_img.remove(item_img)
-    return areas_txt,areas_img,[mismatching_length_txt,mismatching_length_img]
-
-
-def calculate_mismatched_zeros(areas_txt: list, areas_img: list):
-    mismatching_zeros = 0
-    mismatching_zeros_img = []
-    mismatching_zeros_txt = []
-    for item_txt, item_img in zip(areas_txt, areas_img):
-        if 0 in item_img:
-            mismatching_zeros +=1
-            mismatching_zeros_txt.append(item_txt)
-            mismatching_zeros_img.append(item_img)
-            areas_txt.remove(item_txt)
-            areas_img.remove(item_img)
-    return areas_txt, areas_img, [mismatching_zeros_txt, mismatching_zeros_img]
+        for nested_item_txt, nested_item_img in zip(item_txt, item_img):
+            percentages.append(nested_item_img/nested_item_txt*100)
+    return percentages
