@@ -1,8 +1,12 @@
 import os
 import re
-from ultralytics import YOLO
+
 import cv2
+import pandas as pd
 import pybboxes as pbx
+from matplotlib.pyplot import show
+from pandas import DataFrame, cut
+from ultralytics import YOLO
 
 
 def detect_images_and_calculate_areas(model_name: str, img_input_path: str):
@@ -23,7 +27,7 @@ def detect_images_and_calculate_areas(model_name: str, img_input_path: str):
                 img_width=img_sizes[iterate][0],
                 img_height=img_sizes[iterate][1],
                 bounding_boxes=bounding_boxes,
-                i=2
+                i=2,
             )
         )
         iterate += 1
@@ -41,12 +45,13 @@ def load_txt_files_and_calculate_areas(txt_input_path: str, img_input_path):
                 img_width=img_sizes[iterate][0],
                 img_height=img_sizes[iterate][1],
                 bounding_boxes=bounding_boxes,
-                i=3
+                i=3,
             )
         )
         iterate += 1
 
     return areas
+
 
 def calculate_mismatched_length(areas_txt: list, areas_img: list):
     mismatching_length = 0
@@ -59,7 +64,7 @@ def calculate_mismatched_length(areas_txt: list, areas_img: list):
             mismatching_length_img.append(item_img)
             areas_txt.remove(item_txt)
             areas_img.remove(item_img)
-    return areas_txt,areas_img,[mismatching_length_txt,mismatching_length_img]
+    return areas_txt, areas_img, [mismatching_length_txt, mismatching_length_img]
 
 
 def calculate_mismatched_zeros(areas_txt: list, areas_img: list):
@@ -68,7 +73,7 @@ def calculate_mismatched_zeros(areas_txt: list, areas_img: list):
     mismatching_zeros_txt = []
     for item_txt, item_img in zip(areas_txt, areas_img):
         if 0 in item_img:
-            mismatching_zeros +=1
+            mismatching_zeros += 1
             mismatching_zeros_txt.append(item_txt)
             mismatching_zeros_img.append(item_img)
             areas_txt.remove(item_txt)
@@ -77,7 +82,7 @@ def calculate_mismatched_zeros(areas_txt: list, areas_img: list):
 
 
 def convert_bounding_box_to_yolo_format(
-        voc_bbox: list, img_width: int, img_height: int
+    voc_bbox: list, img_width: int, img_height: int
 ):
     converted_voc_bbox = []
     try:
@@ -124,7 +129,7 @@ def get_img_sizes(img_input_path: str):
 
 def to_matrix(list_to_convert: list, split_length: int):
     return [
-        list_to_convert[i: i + split_length]
+        list_to_convert[i : i + split_length]
         for i in range(0, len(list_to_convert), split_length)
     ]
 
@@ -140,9 +145,25 @@ def sort_nested_list(nested: list):
         item.sort()
     return nested
 
+
 def calculate_percentages(areas_txt: list, areas_img: list):
     percentages = []
     for item_txt, item_img in zip(areas_txt, areas_img):
         for nested_item_txt, nested_item_img in zip(item_txt, item_img):
-            percentages.append(nested_item_img/nested_item_txt*100)
+            percentages.append(nested_item_img / nested_item_txt * 100)
     return percentages
+
+
+def create_bar_plot(data: list, bin_edges: list, bin_labels: list):
+    columns = f"{data=}".split("=")[0]
+    df = pd.DataFrame(data, columns=[columns])
+    df["bin"] = cut(
+        df[columns],
+        [
+            *bin_edges,
+            float("inf"),
+        ],
+        labels=bin_labels,
+    )
+    df["bin"].value_counts().sort_index().plot.bar()
+    show()
