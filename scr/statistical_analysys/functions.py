@@ -11,9 +11,19 @@ from ultralytics import YOLO
 from scr.statistical_analysys.variables import area_bin_edges, area_bin_labels
 
 
-def detect_images_and_calculate_areas(model_name: str, img_input_path: str,img_sizes: list):
-    areas = []
+def get_bounding_boxes_from_txt(txt_input_path: str, img_input_path, img_sizes: list):
     iterate = 0
+    bounding_boxes_txt = []
+    for file in sorted_alphanumeric(os.listdir(txt_input_path)):
+        bounding_boxes = read_bounding_boxes(path=txt_input_path + file)
+        bounding_boxes_txt.append(bounding_boxes)
+        iterate += 1
+    return bounding_boxes_txt
+
+
+def get_bounding_boxes_from_img(model_name: str, img_input_path: str, img_sizes: list):
+    iterate = 0
+    bounding_boxes_img = []
     model = YOLO(model_name)
     for file in sorted_alphanumeric(os.listdir(img_input_path)):
         results = model(img_input_path + file, device="mps")
@@ -23,32 +33,24 @@ def detect_images_and_calculate_areas(model_name: str, img_input_path: str,img_s
             img_width=img_sizes[iterate][0],
             img_height=img_sizes[iterate][1],
         )
-        areas.append(
-            calculate_area(
-                img_width=img_sizes[iterate][0],
-                img_height=img_sizes[iterate][1],
-                bounding_boxes=bounding_boxes,
-                i=2,
-            )
-        )
+        bounding_boxes_img.append(bounding_boxes)
         iterate += 1
-    return areas
+    return bounding_boxes_img
 
-def load_txt_files_and_calculate_areas(txt_input_path: str, img_input_path,img_sizes: list):
+
+def calculate_areas(bounding_boxes: list, img_sizes: list, i: int):
     areas = []
     iterate = 0
-    for file in sorted_alphanumeric(os.listdir(txt_input_path)):
-        bounding_boxes = read_bounding_boxes(path=txt_input_path + file)
+    for item in bounding_boxes:
         areas.append(
             calculate_area(
                 img_width=img_sizes[iterate][0],
                 img_height=img_sizes[iterate][1],
-                bounding_boxes=bounding_boxes,
-                i=3,
+                bounding_boxes=item,
+                i=i,
             )
         )
         iterate += 1
-
     return areas
 
 
@@ -167,12 +169,17 @@ def create_bar_plot(data: list, bin_edges: list, bin_labels: list):
     df["bin"].value_counts().sort_index().plot.bar()
     show()
 
+
 def analyze_areas(areas_txt: list, areas_img: list):
-    areas_txt,areas_img,mismatching_length = calculate_mismatched_length(areas_txt=areas_txt,areas_img=areas_img)
-    areas_txt, areas_img, mismatching_zeros = calculate_mismatched_zeros(areas_txt=areas_txt, areas_img=areas_img)
+    areas_txt, areas_img, mismatching_length = calculate_mismatched_length(
+        areas_txt=areas_txt, areas_img=areas_img
+    )
+    areas_txt, areas_img, mismatching_zeros = calculate_mismatched_zeros(
+        areas_txt=areas_txt, areas_img=areas_img
+    )
     areas_txt = sort_nested_list(nested=areas_txt)
     areas_img = sort_nested_list(nested=areas_img)
-    percentages = calculate_percentages(areas_txt=areas_txt,areas_img=areas_img)
+    percentages = calculate_percentages(areas_txt=areas_txt, areas_img=areas_img)
     create_bar_plot(
         data=percentages, bin_edges=area_bin_edges, bin_labels=area_bin_labels
     )
