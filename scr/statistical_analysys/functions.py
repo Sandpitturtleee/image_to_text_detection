@@ -9,9 +9,39 @@ from pandas import DataFrame, cut
 from ultralytics import YOLO
 
 from scr.statistical_analysys.variables import area_bin_edges, area_bin_labels
+from definitions import PAGES_ANALYZE_IMAGES_DIR, PAGES_ANALYZE_LABELS_DIR, ARTICLES_ANALYZE_IMAGES_DIR, \
+    ARTICLES_ANALYZE_LABELS_DIR
 
 
-def get_bounding_boxes_from_txt(txt_input_path: str, img_input_path, img_sizes: list):
+def analyze_pages():
+    img_sizes = get_img_sizes(img_input_path=PAGES_ANALYZE_IMAGES_DIR)
+
+    bounding_boxes_txt = get_bounding_boxes_from_txt(
+        txt_input_path=PAGES_ANALYZE_LABELS_DIR,
+    )
+    bounding_boxes_img = get_bounding_boxes_from_img(
+        model_name="newspaper_best.pt",
+        img_input_path=PAGES_ANALYZE_IMAGES_DIR,
+        img_sizes=img_sizes,
+    )
+    analyze_areas(bounding_boxes_txt=bounding_boxes_txt, bounding_boxes_img=bounding_boxes_img, img_sizes=img_sizes)
+
+
+def analyze_articles():
+    img_sizes = get_img_sizes(img_input_path=ARTICLES_ANALYZE_IMAGES_DIR)
+
+    bounding_boxes_txt = get_bounding_boxes_from_txt(
+        txt_input_path=ARTICLES_ANALYZE_LABELS_DIR,
+    )
+    bounding_boxes_img = get_bounding_boxes_from_img(
+        model_name="article_best.pt",
+        img_input_path=ARTICLES_ANALYZE_IMAGES_DIR,
+        img_sizes=img_sizes,
+    )
+    analyze_areas(bounding_boxes_txt=bounding_boxes_txt, bounding_boxes_img=bounding_boxes_img, img_sizes=img_sizes)
+
+
+def get_bounding_boxes_from_txt(txt_input_path: str):
     iterate = 0
     bounding_boxes_txt = []
     for file in sorted_alphanumeric(os.listdir(txt_input_path)):
@@ -83,7 +113,7 @@ def calculate_mismatched_zeros(areas_txt: list, areas_img: list):
 
 
 def convert_bounding_box_to_yolo_format(
-    voc_bbox: list, img_width: int, img_height: int
+        voc_bbox: list, img_width: int, img_height: int
 ):
     converted_voc_bbox = []
     try:
@@ -130,7 +160,7 @@ def get_img_sizes(img_input_path: str):
 
 def to_matrix(list_to_convert: list, split_length: int):
     return [
-        list_to_convert[i : i + split_length]
+        list_to_convert[i: i + split_length]
         for i in range(0, len(list_to_convert), split_length)
     ]
 
@@ -170,7 +200,14 @@ def create_bar_plot(data: list, bin_edges: list, bin_labels: list):
     show()
 
 
-def analyze_areas(areas_txt: list, areas_img: list):
+def analyze_areas(bounding_boxes_txt: list, bounding_boxes_img: list, img_sizes: list):
+    areas_txt = calculate_areas(
+        bounding_boxes=bounding_boxes_txt, img_sizes=img_sizes, i=3
+    )
+    areas_img = calculate_areas(
+        bounding_boxes=bounding_boxes_img, img_sizes=img_sizes, i=2
+    )
+
     areas_txt, areas_img, mismatching_length = calculate_mismatched_length(
         areas_txt=areas_txt, areas_img=areas_img
     )
