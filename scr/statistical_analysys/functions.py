@@ -79,10 +79,10 @@ def read_bounding_boxes(path: str):
     return content_split
 
 
-def calculate_area(img_width: int, img_height: int, bounding_boxes: list,i: int):
+def calculate_area(img_width: int, img_height: int, bounding_boxes: list, i: int):
     areas = []
     for item in bounding_boxes:
-        areas.append(float(item[i]) * img_width * float(item[i+1]) * img_height)
+        areas.append(float(item[i]) * img_width * float(item[i + 1]) * img_height)
     return areas
 
 
@@ -106,3 +106,37 @@ def sorted_alphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]
     return sorted(data, key=alphanum_key)
+
+
+def sort_nested_list(nested: list):
+    for item in nested:
+        item.sort()
+    return nested
+
+
+def calculate_mismatched_length(areas_txt: list, areas_img: list):
+    mismatching_length = 0
+    mismatching_length_img = []
+    mismatching_length_txt = []
+    for item_txt, item_img in zip(areas_txt, areas_img):
+        if len(item_txt) != len(item_img):
+            mismatching_length += 1
+            mismatching_length_txt.append(item_txt)
+            mismatching_length_img.append(item_img)
+            areas_txt.remove(item_txt)
+            areas_img.remove(item_img)
+    return areas_txt,areas_img,[mismatching_length_txt,mismatching_length_img]
+
+
+def calculate_mismatched_zeros(areas_txt: list, areas_img: list):
+    mismatching_zeros = 0
+    mismatching_zeros_img = []
+    mismatching_zeros_txt = []
+    for item_txt, item_img in zip(areas_txt, areas_img):
+        if 0 in item_img:
+            mismatching_zeros +=1
+            mismatching_zeros_txt.append(item_txt)
+            mismatching_zeros_img.append(item_img)
+            areas_txt.remove(item_txt)
+            areas_img.remove(item_img)
+    return areas_txt, areas_img, [mismatching_zeros_txt, mismatching_zeros_img]
