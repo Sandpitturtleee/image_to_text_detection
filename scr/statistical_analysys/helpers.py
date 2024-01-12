@@ -13,7 +13,7 @@ def sum_areas(areas: list):
     return areas_sum
 
 
-def calculate_areas(bounding_boxes: list, img_sizes: list, i: int):
+def calculate_areas(bounding_boxes: list, img_sizes: list, i: int, j: int):
     areas = []
     iterate = 0
     for item in bounding_boxes:
@@ -23,16 +23,22 @@ def calculate_areas(bounding_boxes: list, img_sizes: list, i: int):
                 img_height=img_sizes[iterate][1],
                 bounding_boxes=item,
                 i=i,
+                j=j,
             )
         )
         iterate += 1
     return areas
 
 
-def calculate_area(img_width: int, img_height: int, bounding_boxes: list, i: int):
+def calculate_area(
+    img_width: int, img_height: int, bounding_boxes: list, i: int, j: int
+):
     areas = []
     for item in bounding_boxes:
-        areas.append(float(item[i]) * img_width * float(item[i + 1]) * img_height)
+        new_item = intersection(box=item, j=j)
+        areas.append(
+            float(new_item[i]) * img_width * float(new_item[i + 1]) * img_height
+        )
     return areas
 
 
@@ -68,22 +74,23 @@ def convert_bounding_box_to_yolo_format(
     voc_bbox: list, img_width: int, img_height: int
 ):
     converted_voc_bbox = []
-    try:
-        for item in voc_bbox:
-            converted_voc_bbox.append(
-                list(
-                    pbx.convert_bbox(
-                        item,
-                        from_type="voc",
-                        to_type="yolo",
-                        image_size=(img_width, img_height),
-                    )
-                )
-            )
-    except ValueError:
-        converted_voc_bbox.append([0, 0, 0, 0])
+
+    for item in voc_bbox:
+        converted_voc_bbox.append(
+            list(pascal_voc_to_yolo(box=item, image_w=img_width, image_h=img_height))
+        )
 
     return converted_voc_bbox
+
+
+def pascal_voc_to_yolo(box, image_w, image_h):
+    x1, y1, x2, y2 = box
+    return [
+        abs(((x2 + x1) / (2 * image_w))),
+        abs(((y2 + y1) / (2 * image_h))),
+        abs((x2 - x1) / image_w),
+        abs((y2 - y1) / image_h),
+    ]
 
 
 def calculate_percentages(areas_txt: list, areas_img: list):
@@ -141,3 +148,38 @@ def sort_nested_list(nested: list):
     for item in nested:
         item.sort()
     return nested
+
+
+def intersection(box: list, j: int):
+    x, y, w, h = float(box[j]), float(box[j + 1]), float(box[j + 2]), float(box[j + 3])
+    a_x, a_y, a_w, a_h = 0.5, 0.5, 1, 1
+    a_max_x = a_x + a_w / 2
+    a_min_x = a_x - a_w / 2
+
+    b_max_x = x + w / 2
+    b_min_x = x - w / 2
+
+    c_min_x = max(a_min_x, b_min_x)
+    c_max_x = min(a_max_x, b_max_x)
+    c_len_x = c_max_x - c_min_x
+
+    a_max_y = a_y + a_h / 2
+    a_min_y = a_y - a_h / 2
+
+    b_max_y = y + h / 2
+    b_min_y = y - h / 2
+
+    c_min_y = max(a_min_y, b_min_y)
+    c_max_y = min(a_max_y, b_max_y)
+    c_len_y = c_max_y - c_min_y
+    area = c_len_y * c_len_x
+
+    c_w = c_len_x
+    c_h = c_len_y
+    c_x = c_min_x + 0.5 * c_w
+    c_y = c_min_y + 0.5 * c_h
+    # return [c_x, c_y, c_w, c_h], area/(w*h)
+    if j == 1:
+        return [0, c_x, c_y, c_w, c_h]
+    else:
+        return [c_x, c_y, c_w, c_h]

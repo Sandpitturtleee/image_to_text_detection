@@ -8,14 +8,8 @@ from pdf2image import convert_from_path
 from PIL import Image
 from ultralytics import YOLO
 
-from definitions import (
-    ARTICLES_CROPPED_DIR,
-    ARTICLES_DIR,
-    NEWSPAPERS_DIR,
-    PAGES_DIR,
-    POPPLER_PATH,
-    RESULTS_DIR,
-)
+from definitions import (ARTICLES_CROPPED_DIR, ARTICLES_DIR, NEWSPAPERS_DIR,
+                         PAGES_DIR, POPPLER_PATH, RESULTS_DIR)
 
 # pip install pdf2image
 # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
