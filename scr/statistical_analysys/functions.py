@@ -12,10 +12,11 @@ from definitions import (ARTICLES_ANALYZE_IMAGES_DIR,
                          ARTICLES_ANALYZE_LABELS_DIR, PAGES_ANALYZE_IMAGES_DIR,
                          PAGES_ANALYZE_LABELS_DIR)
 from scr.statistical_analysys.helpers import (
-    calculate_areas, calculate_mismatched_length, calculate_mismatched_zeros,
-    calculate_percentages, calculate_sum_percentages,
-    convert_bounding_box_to_yolo_format, create_bar_plot, read_bounding_boxes,
-    sort_nested_list, sorted_alphanumeric, sum_areas)
+    add_img_names_to_boxes, calculate_areas, calculate_mismatched_length,
+    calculate_mismatched_zeros, calculate_percentages,
+    calculate_sum_percentages, convert_bounding_box_to_yolo_format,
+    create_bar_plot, get_img_names, read_bounding_boxes, sort_nested_list,
+    sorted_alphanumeric, sum_areas)
 from scr.statistical_analysys.variables import area_bin_edges, area_bin_labels
 
 
@@ -75,8 +76,9 @@ def get_bounding_boxes_from_img(model_name: str, img_input_path: str, img_sizes:
     for file in sorted_alphanumeric(os.listdir(img_input_path)):
         results = model(img_input_path + file, device="mps")
         box = results[0].boxes.xyxy.tolist()
+        bounding_boxes = add_img_names_to_boxes(results=results, bounding_boxes=box)
         bounding_boxes = convert_bounding_box_to_yolo_format(
-            voc_bbox=box,
+            voc_bbox=bounding_boxes,
             img_width=img_sizes[iterate][0],
             img_height=img_sizes[iterate][1],
         )
@@ -86,12 +88,8 @@ def get_bounding_boxes_from_img(model_name: str, img_input_path: str, img_sizes:
 
 
 def analyze_areas(bounding_boxes_txt: list, bounding_boxes_img: list, img_sizes: list):
-    areas_txt = calculate_areas(
-        bounding_boxes=bounding_boxes_txt, img_sizes=img_sizes, i=3, j=1
-    )
-    areas_img = calculate_areas(
-        bounding_boxes=bounding_boxes_img, img_sizes=img_sizes, i=2, j=0
-    )
+    areas_txt = calculate_areas(bounding_boxes=bounding_boxes_txt, img_sizes=img_sizes)
+    areas_img = calculate_areas(bounding_boxes=bounding_boxes_img, img_sizes=img_sizes)
 
     areas_txt, areas_img, mismatching_length = calculate_mismatched_length(
         areas_txt=areas_txt, areas_img=areas_img
@@ -113,12 +111,8 @@ def analyze_areas(bounding_boxes_txt: list, bounding_boxes_img: list, img_sizes:
 def analyze_areas_sum(
     bounding_boxes_txt: list, bounding_boxes_img: list, img_sizes: list
 ):
-    areas_txt = calculate_areas(
-        bounding_boxes=bounding_boxes_txt, img_sizes=img_sizes, i=3, j=1
-    )
-    areas_img = calculate_areas(
-        bounding_boxes=bounding_boxes_img, img_sizes=img_sizes, i=2, j=0
-    )
+    areas_txt = calculate_areas(bounding_boxes=bounding_boxes_txt, img_sizes=img_sizes)
+    areas_img = calculate_areas(bounding_boxes=bounding_boxes_img, img_sizes=img_sizes)
     areas_txt_sum = sum_areas(areas=areas_txt)
     areas_img_sum = sum_areas(areas=areas_img)
     percentages = calculate_sum_percentages(

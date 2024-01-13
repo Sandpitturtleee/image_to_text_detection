@@ -13,7 +13,7 @@ def sum_areas(areas: list):
     return areas_sum
 
 
-def calculate_areas(bounding_boxes: list, img_sizes: list, i: int, j: int):
+def calculate_areas(bounding_boxes: list, img_sizes: list):
     areas = []
     iterate = 0
     for item in bounding_boxes:
@@ -22,23 +22,17 @@ def calculate_areas(bounding_boxes: list, img_sizes: list, i: int, j: int):
                 img_width=img_sizes[iterate][0],
                 img_height=img_sizes[iterate][1],
                 bounding_boxes=item,
-                i=i,
-                j=j,
             )
         )
         iterate += 1
     return areas
 
 
-def calculate_area(
-    img_width: int, img_height: int, bounding_boxes: list, i: int, j: int
-):
+def calculate_area(img_width: int, img_height: int, bounding_boxes: list):
     areas = []
     for item in bounding_boxes:
-        new_item = intersection(box=item, j=j)
-        areas.append(
-            float(new_item[i]) * img_width * float(new_item[i + 1]) * img_height
-        )
+        new_item = intersection(box=item)
+        areas.append(float(new_item[3]) * img_width * float(new_item[4]) * img_height)
     return areas
 
 
@@ -84,8 +78,9 @@ def convert_bounding_box_to_yolo_format(
 
 
 def pascal_voc_to_yolo(box, image_w, image_h):
-    x1, y1, x2, y2 = box
+    name, x1, y1, x2, y2 = box
     return [
+        name,
         abs(((x2 + x1) / (2 * image_w))),
         abs(((y2 + y1) / (2 * image_h))),
         abs((x2 - x1) / image_w),
@@ -150,8 +145,14 @@ def sort_nested_list(nested: list):
     return nested
 
 
-def intersection(box: list, j: int):
-    x, y, w, h = float(box[j]), float(box[j + 1]), float(box[j + 2]), float(box[j + 3])
+def intersection(box: list):
+    name, x, y, w, h = (
+        int(box[0]),
+        float(box[1]),
+        float(box[2]),
+        float(box[3]),
+        float(box[4]),
+    )
     a_x, a_y, a_w, a_h = 0.5, 0.5, 1, 1
     a_max_x = a_x + a_w / 2
     a_min_x = a_x - a_w / 2
@@ -179,7 +180,19 @@ def intersection(box: list, j: int):
     c_x = c_min_x + 0.5 * c_w
     c_y = c_min_y + 0.5 * c_h
     # return [c_x, c_y, c_w, c_h], area/(w*h)
-    if j == 1:
-        return [0, c_x, c_y, c_w, c_h]
-    else:
-        return [c_x, c_y, c_w, c_h]
+    return [name, c_x, c_y, c_w, c_h]
+
+
+def get_img_names(results: list):
+    img_names = []
+    for r in results:
+        for c in r.boxes.cls:
+            img_names.append(int(c))
+    return img_names
+
+
+def add_img_names_to_boxes(results: list, bounding_boxes: list):
+    img_names = get_img_names(results=results)
+    for i in range(len(bounding_boxes)):
+        bounding_boxes[i].insert(0, img_names[i])
+    return bounding_boxes
