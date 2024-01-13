@@ -30,8 +30,9 @@ def calculate_areas(bounding_boxes: list, img_sizes: list):
 
 def calculate_area(img_width: int, img_height: int, bounding_boxes: list):
     areas = []
+    base_box = [0.5, 0.5, 1, 1]
     for item in bounding_boxes:
-        new_item = intersection(box=item)
+        new_item = intersection_yolo(base_box=base_box, box=item)
         areas.append(float(new_item[3]) * img_width * float(new_item[4]) * img_height)
     return areas
 
@@ -145,7 +146,7 @@ def sort_nested_list(nested: list):
     return nested
 
 
-def intersection(box: list):
+def intersection_yolo(base_box: list, box: list):
     name, x, y, w, h = (
         int(box[0]),
         float(box[1]),
@@ -153,7 +154,12 @@ def intersection(box: list):
         float(box[3]),
         float(box[4]),
     )
-    a_x, a_y, a_w, a_h = 0.5, 0.5, 1, 1
+    a_x, a_y, a_w, a_h = (
+        float(base_box[0]),
+        float(base_box[1]),
+        float(base_box[2]),
+        float(base_box[3]),
+    )
     a_max_x = a_x + a_w / 2
     a_min_x = a_x - a_w / 2
 
@@ -179,7 +185,6 @@ def intersection(box: list):
     c_h = c_len_y
     c_x = c_min_x + 0.5 * c_w
     c_y = c_min_y + 0.5 * c_h
-    # return [c_x, c_y, c_w, c_h], area/(w*h)
     return [name, c_x, c_y, c_w, c_h]
 
 
@@ -196,3 +201,23 @@ def add_img_names_to_boxes(results: list, bounding_boxes: list):
     for i in range(len(bounding_boxes)):
         bounding_boxes[i].insert(0, img_names[i])
     return bounding_boxes
+
+
+def bb_intersection_over_union(boxA, boxB):
+    # determine the (x, y)-coordinates of the intersection rectangle
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2])
+    yB = min(boxA[3], boxB[3])
+    # compute the area of intersection rectangle
+    interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
+    # compute the area of both the prediction and ground-truth
+    # rectangles
+    boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
+    boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = interArea / float(boxAArea + boxBArea - interArea)
+    # return the intersection over union value
+    return iou

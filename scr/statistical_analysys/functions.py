@@ -8,15 +8,28 @@ from matplotlib.pyplot import show
 from pandas import DataFrame, cut
 from ultralytics import YOLO
 
-from definitions import (ARTICLES_ANALYZE_IMAGES_DIR,
-                         ARTICLES_ANALYZE_LABELS_DIR, PAGES_ANALYZE_IMAGES_DIR,
-                         PAGES_ANALYZE_LABELS_DIR)
+from definitions import (
+    ARTICLES_ANALYZE_IMAGES_DIR,
+    ARTICLES_ANALYZE_LABELS_DIR,
+    PAGES_ANALYZE_IMAGES_DIR,
+    PAGES_ANALYZE_LABELS_DIR,
+)
 from scr.statistical_analysys.helpers import (
-    add_img_names_to_boxes, calculate_areas, calculate_mismatched_length,
-    calculate_mismatched_zeros, calculate_percentages,
-    calculate_sum_percentages, convert_bounding_box_to_yolo_format,
-    create_bar_plot, get_img_names, read_bounding_boxes, sort_nested_list,
-    sorted_alphanumeric, sum_areas)
+    add_img_names_to_boxes,
+    calculate_areas,
+    calculate_mismatched_length,
+    calculate_mismatched_zeros,
+    calculate_percentages,
+    calculate_sum_percentages,
+    convert_bounding_box_to_yolo_format,
+    create_bar_plot,
+    get_img_names,
+    read_bounding_boxes,
+    sort_nested_list,
+    sorted_alphanumeric,
+    sum_areas,
+    bb_intersection_over_union,
+)
 from scr.statistical_analysys.variables import area_bin_edges, area_bin_labels
 
 
@@ -31,9 +44,15 @@ def analyze_pages():
         img_input_path=PAGES_ANALYZE_IMAGES_DIR,
         img_sizes=img_sizes,
     )
-
-    # analyze_areas(bounding_boxes_txt=bounding_boxes_txt, bounding_boxes_img=bounding_boxes_img, img_sizes=img_sizes)
-    analyze_areas_sum(
+    bounding_boxes_img = sort_boxes_intersection(
+        bounding_boxes_txt=bounding_boxes_txt, bounding_boxes_img=bounding_boxes_img
+    )
+    # analyze_areas_sum(
+    #     bounding_boxes_txt=bounding_boxes_txt,
+    #     bounding_boxes_img=bounding_boxes_img,
+    #     img_sizes=img_sizes,
+    # )
+    analyze_areas(
         bounding_boxes_txt=bounding_boxes_txt,
         bounding_boxes_img=bounding_boxes_img,
         img_sizes=img_sizes,
@@ -51,12 +70,19 @@ def analyze_articles():
         img_input_path=ARTICLES_ANALYZE_IMAGES_DIR,
         img_sizes=img_sizes,
     )
-    # analyze_areas(bounding_boxes_txt=bounding_boxes_txt, bounding_boxes_img=bounding_boxes_img, img_sizes=img_sizes)
+    # bounding_boxes_img = sort_boxes_intersection(
+    #     bounding_boxes_txt=bounding_boxes_txt, bounding_boxes_img=bounding_boxes_img
+    # )
     analyze_areas_sum(
         bounding_boxes_txt=bounding_boxes_txt,
         bounding_boxes_img=bounding_boxes_img,
         img_sizes=img_sizes,
     )
+    # analyze_areas(
+    #     bounding_boxes_txt=bounding_boxes_txt,
+    #     bounding_boxes_img=bounding_boxes_img,
+    #     img_sizes=img_sizes,
+    # )
 
 
 def get_bounding_boxes_from_txt(txt_input_path: str):
@@ -133,3 +159,20 @@ def get_img_sizes(img_input_path: str):
         h, w, _ = im.shape
         img_sizes.append([w, h])
     return img_sizes
+
+
+def sort_boxes_intersection(bounding_boxes_txt: list, bounding_boxes_img: list):
+    sorted_boxes_img = []
+    for box_txt, box_img in zip(bounding_boxes_txt, bounding_boxes_img):
+        sorted_box = []
+        for item_txt in box_txt:
+            item_txt_converted = [float(i) for i in item_txt]
+            intersection_percentage = []
+            for item_img in box_img:
+                intersection_percentage.append(
+                    bb_intersection_over_union(item_txt_converted, item_img)
+                )
+            max_index = intersection_percentage.index(max(intersection_percentage))
+            sorted_box.append(box_img[max_index])
+        sorted_boxes_img.append(sorted_box)
+    return sorted_boxes_img
