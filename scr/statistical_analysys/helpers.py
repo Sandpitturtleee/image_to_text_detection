@@ -33,7 +33,11 @@ def calculate_area(img_width: int, img_height: int, bounding_boxes: list):
     base_box = [0.5, 0.5, 1, 1]
     for item in bounding_boxes:
         new_item = intersection_yolo(base_box=base_box, box=item)
-        areas.append(float(new_item[3]) * img_width * float(new_item[4]) * img_height)
+        try:
+            areas.append(float(new_item[3]) * img_width * float(new_item[4]) * img_height)
+        except TypeError:
+            # Happens when txt_size>img_size 11>7
+            areas.append(0)
     return areas
 
 
@@ -147,44 +151,48 @@ def sort_nested_list(nested: list):
 
 
 def intersection_yolo(base_box: list, box: list):
-    name, x, y, w, h = (
-        int(box[0]),
-        float(box[1]),
-        float(box[2]),
-        float(box[3]),
-        float(box[4]),
-    )
-    a_x, a_y, a_w, a_h = (
-        float(base_box[0]),
-        float(base_box[1]),
-        float(base_box[2]),
-        float(base_box[3]),
-    )
-    a_max_x = a_x + a_w / 2
-    a_min_x = a_x - a_w / 2
+    try:
+        name, x, y, w, h = (
+            box[0],
+            box[1],
+            box[2],
+            box[3],
+            box[4],
+        )
+        a_x, a_y, a_w, a_h = (
+            float(base_box[0]),
+            float(base_box[1]),
+            float(base_box[2]),
+            float(base_box[3]),
+        )
+        a_max_x = a_x + a_w / 2
+        a_min_x = a_x - a_w / 2
 
-    b_max_x = x + w / 2
-    b_min_x = x - w / 2
+        b_max_x = x + w / 2
+        b_min_x = x - w / 2
 
-    c_min_x = max(a_min_x, b_min_x)
-    c_max_x = min(a_max_x, b_max_x)
-    c_len_x = c_max_x - c_min_x
+        c_min_x = max(a_min_x, b_min_x)
+        c_max_x = min(a_max_x, b_max_x)
+        c_len_x = c_max_x - c_min_x
 
-    a_max_y = a_y + a_h / 2
-    a_min_y = a_y - a_h / 2
+        a_max_y = a_y + a_h / 2
+        a_min_y = a_y - a_h / 2
 
-    b_max_y = y + h / 2
-    b_min_y = y - h / 2
+        b_max_y = y + h / 2
+        b_min_y = y - h / 2
 
-    c_min_y = max(a_min_y, b_min_y)
-    c_max_y = min(a_max_y, b_max_y)
-    c_len_y = c_max_y - c_min_y
-    area = c_len_y * c_len_x
+        c_min_y = max(a_min_y, b_min_y)
+        c_max_y = min(a_max_y, b_max_y)
+        c_len_y = c_max_y - c_min_y
+        area = c_len_y * c_len_x
 
-    c_w = c_len_x
-    c_h = c_len_y
-    c_x = c_min_x + 0.5 * c_w
-    c_y = c_min_y + 0.5 * c_h
+        c_w = c_len_x
+        c_h = c_len_y
+        c_x = c_min_x + 0.5 * c_w
+        c_y = c_min_y + 0.5 * c_h
+    except TypeError:
+        # Happens when txt_size>img_size 11>7
+        return 0
     return [name, c_x, c_y, c_w, c_h]
 
 
@@ -205,19 +213,53 @@ def add_img_names_to_boxes(results: list, bounding_boxes: list):
 
 def bb_intersection_over_union(boxA, boxB):
     # determine the (x, y)-coordinates of the intersection rectangle
-    xA = max(boxA[0], boxB[0])
-    yA = max(boxA[1], boxB[1])
-    xB = min(boxA[2], boxB[2])
-    yB = min(boxA[3], boxB[3])
+    xA = max(boxA[1], boxB[1])
+    yA = max(boxA[2], boxB[2])
+    xB = min(boxA[3], boxB[3])
+    yB = min(boxA[4], boxB[4])
     # compute the area of intersection rectangle
     interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
     # compute the area of both the prediction and ground-truth
     # rectangles
-    boxAArea = (boxA[2] - boxA[0] + 1) * (boxA[3] - boxA[1] + 1)
-    boxBArea = (boxB[2] - boxB[0] + 1) * (boxB[3] - boxB[1] + 1)
+    boxAArea = (boxA[3] - boxA[1] + 1) * (boxA[4] - boxA[2] + 1)
+    boxBArea = (boxB[3] - boxB[1] + 1) * (boxB[4] - boxB[2] + 1)
     # compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + ground-truth
     # areas - the interesection area
     iou = interArea / float(boxAArea + boxBArea - interArea)
     # return the intersection over union value
     return iou
+
+def convert_box_txt_to_float(bounding_boxes_txt):
+    bounding_boxes_txt_converted = []
+    for box_txt in bounding_boxes_txt:
+        box_txt_converted = []
+        for item_txt in box_txt:
+            box_txt_converted.append([float(i) for i in item_txt])
+        bounding_boxes_txt_converted.append(box_txt_converted)
+    return bounding_boxes_txt_converted
+
+
+def create_2d_intersection_percentage_list(box_txt: list,box_img: list):
+    intersection_percentage_2d = []
+    for item_txt in box_txt:
+        intersection_percentage = []
+        for item_img in box_img:
+            intersection_percentage.append(
+                bb_intersection_over_union(item_txt, item_img)
+            )
+        intersection_percentage_2d.append(intersection_percentage)
+    return intersection_percentage_2d
+
+def create_blank_list_of_length(box_txt: list):
+    blank_list = []
+    for i in range(len(box_txt)):
+        blank_list.append(0)
+    return blank_list
+
+def insert_0_to_list(max_index_2d: tuple, list_2d: list):
+    for i in range(len(list_2d[max_index_2d[0]])):
+        list_2d[max_index_2d[0]][i] = 0
+    for item in list_2d:
+        item[max_index_2d[1]] = 0
+    return list_2d
