@@ -122,27 +122,14 @@ def get_bounding_boxes_from_img(model_name: str, img_input_path: str, img_sizes:
 
 
 def analyze_areas(bounding_boxes_txt: list, bounding_boxes_img: list, img_sizes: list):
-    # print(bounding_boxes_txt)
-    # print(bounding_boxes_img)
-    # print(len(bounding_boxes_txt))
-    # print(len(bounding_boxes_img))
     areas_txt = calculate_areas(bounding_boxes=bounding_boxes_txt, img_sizes=img_sizes)
     areas_img = calculate_areas(bounding_boxes=bounding_boxes_img, img_sizes=img_sizes)
-    # areas_txt, areas_img, mismatching_length = calculate_mismatched_length(
-    #     areas_txt=areas_txt, areas_img=areas_img
-    # )
-    # areas_txt, areas_img, mismatching_zeros = calculate_mismatched_zeros(
-    #     areas_txt=areas_txt, areas_img=areas_img
-    # )
-    # areas_txt = sort_nested_list(nested=areas_txt)
-    # areas_img = sort_nested_list(nested=areas_img)
+
     percentages = calculate_percentages(areas_txt=areas_txt, areas_img=areas_img)
     create_bar_plot(
         data=percentages, bin_edges=area_bin_edges, bin_labels=area_bin_labels
     )
-    # print("Mismatching length = " + str(len(mismatching_length[0])))
-    # print("Mismatching zeros = "+str(len(mismatching_zeros[0])))
-    # print("Correct areas = " + str(len(areas_txt)))
+
 
 
 def analyze_areas_sum(

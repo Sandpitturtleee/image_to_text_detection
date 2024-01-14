@@ -97,7 +97,9 @@ def calculate_percentages(areas_txt: list, areas_img: list):
     percentages = []
     for item_txt, item_img in zip(areas_txt, areas_img):
         for nested_item_txt, nested_item_img in zip(item_txt, item_img):
-            percentages.append(nested_item_img / nested_item_txt)
+            result = nested_item_img/nested_item_txt
+            if result != 0:
+                percentages.append(result)
     return percentages
 
 
