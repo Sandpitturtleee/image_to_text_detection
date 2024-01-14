@@ -34,7 +34,9 @@ def calculate_area(img_width: int, img_height: int, bounding_boxes: list):
     for item in bounding_boxes:
         new_item = intersection_yolo(base_box=base_box, box=item)
         try:
-            areas.append(float(new_item[3]) * img_width * float(new_item[4]) * img_height)
+            areas.append(
+                float(new_item[3]) * img_width * float(new_item[4]) * img_height
+            )
         except TypeError:
             # Happens when txt_size>img_size 11>7
             areas.append(0)
@@ -97,7 +99,7 @@ def calculate_percentages(areas_txt: list, areas_img: list):
     percentages = []
     for item_txt, item_img in zip(areas_txt, areas_img):
         for nested_item_txt, nested_item_img in zip(item_txt, item_img):
-            result = nested_item_img/nested_item_txt
+            result = nested_item_img / nested_item_txt
             if result != 0:
                 percentages.append(result)
     return percentages
@@ -213,25 +215,6 @@ def add_img_names_to_boxes(results: list, bounding_boxes: list):
     return bounding_boxes
 
 
-def bb_intersection_over_union(boxA, boxB):
-    # determine the (x, y)-coordinates of the intersection rectangle
-    xA = max(boxA[1], boxB[1])
-    yA = max(boxA[2], boxB[2])
-    xB = min(boxA[3], boxB[3])
-    yB = min(boxA[4], boxB[4])
-    # compute the area of intersection rectangle
-    interArea = max(0, xB - xA + 1) * max(0, yB - yA + 1)
-    # compute the area of both the prediction and ground-truth
-    # rectangles
-    boxAArea = (boxA[3] - boxA[1] + 1) * (boxA[4] - boxA[2] + 1)
-    boxBArea = (boxB[3] - boxB[1] + 1) * (boxB[4] - boxB[2] + 1)
-    # compute the intersection over union by taking the intersection
-    # area and dividing it by the sum of prediction + ground-truth
-    # areas - the interesection area
-    iou = interArea / float(boxAArea + boxBArea - interArea)
-    # return the intersection over union value
-    return iou
-
 def convert_box_txt_to_float(bounding_boxes_txt):
     bounding_boxes_txt_converted = []
     for box_txt in bounding_boxes_txt:
@@ -240,28 +223,3 @@ def convert_box_txt_to_float(bounding_boxes_txt):
             box_txt_converted.append([float(i) for i in item_txt])
         bounding_boxes_txt_converted.append(box_txt_converted)
     return bounding_boxes_txt_converted
-
-
-def create_2d_intersection_percentage_list(box_txt: list,box_img: list):
-    intersection_percentage_2d = []
-    for item_txt in box_txt:
-        intersection_percentage = []
-        for item_img in box_img:
-            intersection_percentage.append(
-                bb_intersection_over_union(item_txt, item_img)
-            )
-        intersection_percentage_2d.append(intersection_percentage)
-    return intersection_percentage_2d
-
-def create_blank_list_of_length(box_txt: list):
-    blank_list = []
-    for i in range(len(box_txt)):
-        blank_list.append(0)
-    return blank_list
-
-def insert_0_to_list(max_index_2d: tuple, list_2d: list):
-    for i in range(len(list_2d[max_index_2d[0]])):
-        list_2d[max_index_2d[0]][i] = 0
-    for item in list_2d:
-        item[max_index_2d[1]] = 0
-    return list_2d

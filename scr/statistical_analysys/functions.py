@@ -6,34 +6,21 @@ import cv2
 import pandas as pd
 import pybboxes as pbx
 from matplotlib.pyplot import show
-from numpy import array
+from numpy import array, unravel_index
 from pandas import DataFrame, cut
 from ultralytics import YOLO
 
-from numpy import unravel_index
-from definitions import (
-    ARTICLES_ANALYZE_IMAGES_DIR,
-    ARTICLES_ANALYZE_LABELS_DIR,
-    PAGES_ANALYZE_IMAGES_DIR,
-    PAGES_ANALYZE_LABELS_DIR,
-)
+from definitions import (ARTICLES_ANALYZE_IMAGES_DIR,
+                         ARTICLES_ANALYZE_LABELS_DIR, PAGES_ANALYZE_IMAGES_DIR,
+                         PAGES_ANALYZE_LABELS_DIR)
 from scr.statistical_analysys.helpers import (
-    add_img_names_to_boxes,
-    calculate_areas,
-    calculate_mismatched_length,
-    calculate_mismatched_zeros,
-    calculate_percentages,
-    calculate_sum_percentages,
-    convert_bounding_box_to_yolo_format,
-    create_bar_plot,
-    get_img_names,
-    read_bounding_boxes,
-    sort_nested_list,
-    sorted_alphanumeric,
-    sum_areas,
-    bb_intersection_over_union, convert_box_txt_to_float, create_2d_intersection_percentage_list,
-    create_blank_list_of_length, insert_0_to_list,
-)
+    add_img_names_to_boxes, calculate_areas, calculate_mismatched_length,
+    calculate_mismatched_zeros, calculate_percentages,
+    calculate_sum_percentages, convert_bounding_box_to_yolo_format,
+    convert_box_txt_to_float, create_bar_plot, get_img_names,
+    read_bounding_boxes, sort_nested_list, sorted_alphanumeric, sum_areas)
+from scr.statistical_analysys.intersection_sorting import \
+    sort_boxes_intersection
 from scr.statistical_analysys.variables import area_bin_edges, area_bin_labels
 
 
@@ -50,7 +37,7 @@ def analyze_pages():
     )
 
     bounding_boxes_img = sort_boxes_intersection(
-        bounding_boxes_txt=bounding_boxes_txt, bounding_boxes_img=bounding_boxes_img
+        bb_labeled=bounding_boxes_txt, bb_detected=bounding_boxes_img
     )
 
     analyze_areas_sum(
@@ -78,7 +65,7 @@ def analyze_articles():
     )
 
     bounding_boxes_img = sort_boxes_intersection(
-        bounding_boxes_txt=bounding_boxes_txt, bounding_boxes_img=bounding_boxes_img
+        bb_labeled=bounding_boxes_txt, bb_detected=bounding_boxes_img
     )
     analyze_areas_sum(
         bounding_boxes_txt=bounding_boxes_txt,
@@ -131,7 +118,6 @@ def analyze_areas(bounding_boxes_txt: list, bounding_boxes_img: list, img_sizes:
     )
 
 
-
 def analyze_areas_sum(
     bounding_boxes_txt: list, bounding_boxes_img: list, img_sizes: list
 ):
@@ -159,27 +145,3 @@ def get_img_sizes(img_input_path: str):
         h, w, _ = im.shape
         img_sizes.append([w, h])
     return img_sizes
-
-
-def sort_boxes_intersection(bounding_boxes_txt: list, bounding_boxes_img: list):
-    sorted_boxes_img = []
-    for box_txt, box_img in zip(bounding_boxes_txt, bounding_boxes_img):
-
-        intersection_percentage_2d = create_2d_intersection_percentage_list(box_img=box_img, box_txt=box_txt)
-        intersection_percentage_2d = array(intersection_percentage_2d)
-        blank_list = create_blank_list_of_length(box_txt=box_txt)
-        for i in range(len(box_txt)):
-            if i == len(box_img):
-                break
-            max_2d_index = unravel_index(intersection_percentage_2d.argmax(), intersection_percentage_2d.shape)
-            blank_list[max_2d_index[0]] = box_img[max_2d_index[1]]
-            box_img[max_2d_index[1]] = 0
-            intersection_percentage_2d = insert_0_to_list(max_index_2d=max_2d_index, list_2d=intersection_percentage_2d)
-
-        for item_img in box_img:
-            if item_img not in blank_list and item_img != 0:
-                blank_list.append(item_img)
-
-        sorted_boxes_img.append(blank_list)
-
-    return sorted_boxes_img
