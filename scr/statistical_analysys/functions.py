@@ -1,13 +1,5 @@
 import os
-import re
-from pprint import pprint
 
-import cv2
-import pandas as pd
-import pybboxes as pbx
-from matplotlib.pyplot import show
-from numpy import array, unravel_index
-from pandas import DataFrame, cut
 from ultralytics import YOLO
 
 from definitions import (
@@ -16,24 +8,20 @@ from definitions import (
     PAGES_ANALYZE_IMAGES_DIR,
     PAGES_ANALYZE_LABELS_DIR,
 )
+from scr.statistical_analysys.percentages_calculation import (
+    calculate_areas_percentages,
+    calculate_areas_percentages_sum,
+)
+from scr.statistical_analysys.plot_functions import create_bar_plots
 from scr.statistical_analysys.helpers import (
     add_img_names_to_boxes,
-    calculate_areas,
-    calculate_mismatched_length,
-    calculate_mismatched_zeros,
-    calculate_percentages,
-    calculate_sum_percentages,
     convert_bounding_box_to_yolo_format,
     convert_box_txt_to_float,
-    create_bar_plot,
-    get_img_names,
     read_bounding_boxes,
-    sort_nested_list,
     sorted_alphanumeric,
-    sum_areas,
+    get_img_sizes,
 )
 from scr.statistical_analysys.intersection_sorting import sort_boxes_intersection
-from scr.statistical_analysys.variables import area_bin_edges, area_bin_labels
 
 
 def analyze_pages():
@@ -52,16 +40,17 @@ def analyze_pages():
         bb_labeled=bounding_boxes_txt, bb_detected=bounding_boxes_img
     )
 
-    analyze_areas_sum(
+    percentages_sum = calculate_areas_percentages_sum(
         bounding_boxes_txt=bounding_boxes_txt,
         bounding_boxes_img=bounding_boxes_img,
         img_sizes=img_sizes,
     )
-    analyze_areas(
+    percentages = calculate_areas_percentages(
         bounding_boxes_txt=bounding_boxes_txt,
         bounding_boxes_img=bounding_boxes_img,
         img_sizes=img_sizes,
     )
+    create_bar_plots(percentages_sum=percentages_sum, percentages=percentages)
 
 
 def analyze_articles():
@@ -79,16 +68,17 @@ def analyze_articles():
     bounding_boxes_img = sort_boxes_intersection(
         bb_labeled=bounding_boxes_txt, bb_detected=bounding_boxes_img
     )
-    analyze_areas_sum(
+    percentages_sum = calculate_areas_percentages_sum(
         bounding_boxes_txt=bounding_boxes_txt,
         bounding_boxes_img=bounding_boxes_img,
         img_sizes=img_sizes,
     )
-    analyze_areas(
+    percentages = calculate_areas_percentages(
         bounding_boxes_txt=bounding_boxes_txt,
         bounding_boxes_img=bounding_boxes_img,
         img_sizes=img_sizes,
     )
+    create_bar_plots(percentages_sum=percentages_sum, percentages=percentages)
 
 
 def get_bounding_boxes_from_txt(txt_input_path: str):
@@ -118,42 +108,3 @@ def get_bounding_boxes_from_img(model_name: str, img_input_path: str, img_sizes:
         bounding_boxes_img.append(bounding_boxes)
         iterate += 1
     return bounding_boxes_img
-
-
-def analyze_areas(bounding_boxes_txt: list, bounding_boxes_img: list, img_sizes: list):
-    areas_txt = calculate_areas(bounding_boxes=bounding_boxes_txt, img_sizes=img_sizes)
-    areas_img = calculate_areas(bounding_boxes=bounding_boxes_img, img_sizes=img_sizes)
-
-    percentages = calculate_percentages(areas_txt=areas_txt, areas_img=areas_img)
-    create_bar_plot(
-        data=percentages, bin_edges=area_bin_edges, bin_labels=area_bin_labels
-    )
-
-
-def analyze_areas_sum(
-    bounding_boxes_txt: list, bounding_boxes_img: list, img_sizes: list
-):
-    areas_txt = calculate_areas(bounding_boxes=bounding_boxes_txt, img_sizes=img_sizes)
-    areas_img = calculate_areas(bounding_boxes=bounding_boxes_img, img_sizes=img_sizes)
-
-    areas_txt_sum = sum_areas(areas=areas_txt)
-    areas_img_sum = sum_areas(areas=areas_img)
-    percentages = calculate_sum_percentages(
-        areas_txt=areas_txt_sum, areas_img=areas_img_sum
-    )
-    create_bar_plot(
-        data=percentages, bin_edges=area_bin_edges, bin_labels=area_bin_labels
-    )
-
-    # print("Mismatching length = " + str(len(mismatching_length[0])))
-    # print("Mismatching zeros = "+str(len(mismatching_zeros[0])))
-    # print("Correct areas = " + str(len(areas_txt)))
-
-
-def get_img_sizes(img_input_path: str):
-    img_sizes = []
-    for file in sorted_alphanumeric(os.listdir(img_input_path)):
-        im = cv2.imread(img_input_path + file)
-        h, w, _ = im.shape
-        img_sizes.append([w, h])
-    return img_sizes
