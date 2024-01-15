@@ -85,23 +85,31 @@ def convert_bounding_box_to_yolo_format(
 
 
 def pascal_voc_to_yolo(box, image_w, image_h):
-    name, x1, y1, x2, y2 = box
+    converted_box = convert_bb_img_detected_edges(bb_img_detected=box)
+    name, x1, y1, x2, y2 = converted_box
     return [
         name,
-        abs(((x2 + x1) / (2 * image_w))),
-        abs(((y2 + y1) / (2 * image_h))),
-        abs((x2 - x1) / image_w),
-        abs((y2 - y1) / image_h),
+        ((x2 + x1) / (2 * image_w)),
+        ((y2 + y1) / (2 * image_h)),
+        (x2 - x1) / image_w,
+        (y2 - y1) / image_h,
     ]
+
+
+def convert_bb_img_detected_edges(bb_img_detected: list) -> list:
+    name, x1, y1, x2, y2 = bb_img_detected
+    x1_converted = min(x1, x2)
+    y1_converted = min(y1, y2)
+    x2_converted = max(x1, x2)
+    y2_converted = max(y1, y2)
+    return [name, x1_converted, y1_converted, x2_converted, y2_converted]
 
 
 def calculate_percentages(areas_txt: list, areas_img: list):
     percentages = []
     for item_txt, item_img in zip(areas_txt, areas_img):
         for nested_item_txt, nested_item_img in zip(item_txt, item_img):
-            result = nested_item_img / nested_item_txt
-            if result != 0:
-                percentages.append(result)
+            percentages.append(nested_item_img / nested_item_txt)
     return percentages
 
 

@@ -10,17 +10,29 @@ from numpy import array, unravel_index
 from pandas import DataFrame, cut
 from ultralytics import YOLO
 
-from definitions import (ARTICLES_ANALYZE_IMAGES_DIR,
-                         ARTICLES_ANALYZE_LABELS_DIR, PAGES_ANALYZE_IMAGES_DIR,
-                         PAGES_ANALYZE_LABELS_DIR)
+from definitions import (
+    ARTICLES_ANALYZE_IMAGES_DIR,
+    ARTICLES_ANALYZE_LABELS_DIR,
+    PAGES_ANALYZE_IMAGES_DIR,
+    PAGES_ANALYZE_LABELS_DIR,
+)
 from scr.statistical_analysys.helpers import (
-    add_img_names_to_boxes, calculate_areas, calculate_mismatched_length,
-    calculate_mismatched_zeros, calculate_percentages,
-    calculate_sum_percentages, convert_bounding_box_to_yolo_format,
-    convert_box_txt_to_float, create_bar_plot, get_img_names,
-    read_bounding_boxes, sort_nested_list, sorted_alphanumeric, sum_areas)
-from scr.statistical_analysys.intersection_sorting import \
-    sort_boxes_intersection
+    add_img_names_to_boxes,
+    calculate_areas,
+    calculate_mismatched_length,
+    calculate_mismatched_zeros,
+    calculate_percentages,
+    calculate_sum_percentages,
+    convert_bounding_box_to_yolo_format,
+    convert_box_txt_to_float,
+    create_bar_plot,
+    get_img_names,
+    read_bounding_boxes,
+    sort_nested_list,
+    sorted_alphanumeric,
+    sum_areas,
+)
+from scr.statistical_analysys.intersection_sorting import sort_boxes_intersection
 from scr.statistical_analysys.variables import area_bin_edges, area_bin_labels
 
 

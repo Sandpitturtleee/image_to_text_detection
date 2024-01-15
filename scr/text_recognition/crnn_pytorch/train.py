@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 
 import argparse
+
 # from warpctc_pytorch import CTCLoss
 import os
 import random
