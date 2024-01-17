@@ -114,6 +114,8 @@ def get_bounding_boxes_from_img(
     :type model_name: str
     :param folder_path: Path to folder with images
     :type folder_path: str
+    :param img_sizes: List with sizes of images
+    :type img_sizes: str
     :return: A list all detected bounding boxes
     :rtype: list[list[list[float|int]]]
     """
