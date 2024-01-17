@@ -41,13 +41,13 @@ def analyze_pages():
     )
 
     percentages_sum = calculate_areas_percentages_sum(
-        bounding_boxes_txt=bounding_boxes_txt,
-        bounding_boxes_img=bounding_boxes_img,
+        bb_labeled=bounding_boxes_txt,
+        bb_detected=bounding_boxes_img,
         img_sizes=img_sizes,
     )
     percentages = calculate_areas_percentages(
-        bounding_boxes_txt=bounding_boxes_txt,
-        bounding_boxes_img=bounding_boxes_img,
+        bb_labeled=bounding_boxes_txt,
+        bb_detected=bounding_boxes_img,
         img_sizes=img_sizes,
     )
     create_bar_plots(percentages_sum=percentages_sum, percentages=percentages)
@@ -69,13 +69,13 @@ def analyze_articles():
         bb_labeled=bounding_boxes_txt, bb_detected=bounding_boxes_img
     )
     percentages_sum = calculate_areas_percentages_sum(
-        bounding_boxes_txt=bounding_boxes_txt,
-        bounding_boxes_img=bounding_boxes_img,
+        bb_labeled=bounding_boxes_txt,
+        bb_detected=bounding_boxes_img,
         img_sizes=img_sizes,
     )
     percentages = calculate_areas_percentages(
-        bounding_boxes_txt=bounding_boxes_txt,
-        bounding_boxes_img=bounding_boxes_img,
+        bb_labeled=bounding_boxes_txt,
+        bb_detected=bounding_boxes_img,
         img_sizes=img_sizes,
     )
     create_bar_plots(percentages_sum=percentages_sum, percentages=percentages)
