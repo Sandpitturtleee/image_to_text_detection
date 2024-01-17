@@ -48,7 +48,7 @@ def calculate_bb_file_areas(
     bb_file_areas = []
     bb_base = [0.5, 0.5, 1, 1]
     for bb_img in bb_file:
-        bb_intersection = intersection_yolo(bb_base=bb_base, bb_img=bb_img)
+        bb_intersection = intersection_yolo(bb_img_base=bb_base, bb_img=bb_img)
         try:
             bb_file_areas.append(
                 float(bb_intersection[3])

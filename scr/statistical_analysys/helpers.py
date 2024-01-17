@@ -4,32 +4,89 @@ import re
 import cv2
 
 
-def convert_bounding_box_to_yolo_format(
-    voc_bbox: list, img_width: int, img_height: int
-):
-    converted_voc_bbox = []
+def read_bounding_boxes(file_name: str) -> list[list[float]]:
+    """
+    Reads bounding boxes data from txt file and puts it into a list
 
-    for item in voc_bbox:
-        converted_voc_bbox.append(
-            list(pascal_voc_to_yolo(box=item, image_w=img_width, image_h=img_height))
+    Parameters:
+    :param file_name: Name of the file
+    :type file_name: str
+    :return: A list of list with bounding boxes
+    :rtype: list[list[float]]
+    """
+    with open(file_name) as f:
+        content = f.read().splitlines()
+    content_split = [word for line in content for word in line.split()]
+    content_split = to_matrix(content_split, 5)
+    return content_split
+
+
+def convert_bb_file_voc_to_yolo(
+    bb_file_voc: list[list[list[float | int]]], img_width: int, img_height: int
+) -> list[list[float | int]]:
+    """
+    Converts bounding box of img images from file from [x1,y1,x2,y2] to [x,y,w,h] format
+
+    Parameters:
+    :param bb_file_voc: List with bounding boxes for all images in a file
+    :type bb_file_voc: list[list[float]]
+    :param img_width: Height of a base file image
+    :type img_width: int
+    :param img_height: Height of a base file image
+    :type img_height: int
+    :return: Bounding boxes in yolo format
+    :rtype: list[list[float|int]]
+    """
+    bb_file_voc_converted = []
+    for bb_img_voc in bb_file_voc:
+        bb_file_voc_converted.append(
+            list(
+                convert_bb_img_voc_to_yolo(
+                    bb_img_voc=bb_img_voc, img_width=img_width, img_height=img_height
+                )
+            )
         )
 
-    return converted_voc_bbox
+    return bb_file_voc_converted
 
 
-def pascal_voc_to_yolo(box, image_w, image_h):
-    converted_box = convert_bb_img_detected_edges(bb_img_detected=box)
-    name, x1, y1, x2, y2 = converted_box
+def convert_bb_img_voc_to_yolo(
+    bb_img_voc: list[list[float | int]], img_width: int, img_height: int
+) -> list[float | int]:
+    """
+    Converts bounding box of a single img from [x1,y1,x2,y2] to [x,y,w,h] format
+
+    Parameters:
+    :param bb_img_voc: List with bounding box for one img file
+    :type bb_img_voc: list[list[float|int]]
+    :param img_width: Height of a base file image
+    :type img_width: int
+    :param img_height: Height of a base file image
+    :type img_height: int
+    :return: Bounding boxes in yolo format
+    :rtype: list[float|int]
+    """
+    bb_img_converted = convert_bb_img_detected_edges(bb_img_detected=bb_img_voc)
+    name, x1, y1, x2, y2 = bb_img_converted
     return [
         name,
-        ((x2 + x1) / (2 * image_w)),
-        ((y2 + y1) / (2 * image_h)),
-        (x2 - x1) / image_w,
-        (y2 - y1) / image_h,
+        ((x2 + x1) / (2 * img_width)),
+        ((y2 + y1) / (2 * img_height)),
+        (x2 - x1) / img_width,
+        (y2 - y1) / img_height,
     ]
 
 
-def convert_bb_img_detected_edges(bb_img_detected: list) -> list:
+def convert_bb_img_detected_edges(bb_img_detected: list[list[float | int]]) -> list:
+    """
+    Converts x1 x2 y1 y2 to correct box format, changing edges when YOLO gave wrong result
+
+    Parameters:
+    :param bb_img_detected: List with bounding box for one img file
+    :type bb_img_detected: list[list[float|int]]
+    :return: Converted bounding box
+    :rtype: list[float|int]
+    """
     name, x1, y1, x2, y2 = bb_img_detected
     x1_converted = min(x1, x2)
     y1_converted = min(y1, y2)
@@ -38,28 +95,96 @@ def convert_bb_img_detected_edges(bb_img_detected: list) -> list:
     return [name, x1_converted, y1_converted, x2_converted, y2_converted]
 
 
-def read_bounding_boxes(path: str):
-    with open(path) as f:
-        content = f.read().splitlines()
-    content_split = [word for line in content for word in line.split()]
-    content_split = to_matrix(content_split, 5)
-    return content_split
+def convert_bb_labeled_to_float(
+    bb_labeled: list[list[list[float]]],
+) -> list[list[list[float]]]:
+    """
+    Converts x1 x2 y1 y2 to correct box format, changing edges when YOLO gave wrong result
+
+    Parameters:
+    :param bb_labeled: List with bounding boxes in string
+    :type bb_labeled: list[list[list[]]]
+    :return: Bounding boxes converted to float
+    :rtype: list[list[list[]]]
+    """
+    bb_labeled_converted = []
+    for bb_file_labeled in bb_labeled:
+        bb_file_labeled_converted = []
+        for bb_img_labeled in bb_file_labeled:
+            bb_file_labeled_converted.append([float(i) for i in bb_img_labeled])
+        bb_labeled_converted.append(bb_file_labeled_converted)
+    return bb_labeled_converted
 
 
-def to_matrix(list_to_convert: list, split_length: int):
-    return [
-        list_to_convert[i : i + split_length]
-        for i in range(0, len(list_to_convert), split_length)
-    ]
+def get_img_sizes(folder_path: str) -> list[list[int]]:
+    """
+    Gets sizes of all images from folder
+
+    Parameters:
+    :param folder_path: Path to folder with images
+    :type folder_path: str
+    :return: A list with sizes
+    :rtype: list[list[int]]
+    """
+    img_sizes = []
+    for file in sorted_alphanumeric(os.listdir(folder_path)):
+        im = cv2.imread(folder_path + file)
+        h, w, _ = im.shape
+        img_sizes.append([w, h])
+    return img_sizes
 
 
-def sorted_alphanumeric(data):
-    convert = lambda text: int(text) if text.isdigit() else text.lower()
-    alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]
-    return sorted(data, key=alphanum_key)
+def get_img_detected_classes(results: list) -> list:
+    """
+    Gets classes numbers 0,1,2... detected for file image
+
+    Parameters:
+    :param results: Results for YOLO object detection on file
+    :type results: list
+    :return: A list with detected classes
+    :rtype: list
+    """
+    img_detected_classes = []
+    for r in results:
+        for c in r.boxes.cls:
+            img_detected_classes.append(int(c))
+    return img_detected_classes
 
 
-def intersection_yolo(bb_base: list, bb_img: list):
+def add_img_names_to_boxes(
+    results: list, bb_labeled: list[list[list[float]]]
+) -> list[list[list[float]]]:
+    """
+    Ads classes numbers 0,1,2... detected for file image to bounding boxes
+
+    Parameters:
+    :param results: Results for YOLO object detection on file
+    :type results: list
+    :param bb_labeled: Results for YOLO object detection on file
+    :type bb_labeled: list[list[list[float]]]
+    :return: A list with detected classes
+    :rtype: list
+    """
+    img_detected_classes = get_img_detected_classes(results=results)
+    for i in range(len(bb_labeled)):
+        bb_labeled[i].insert(0, img_detected_classes[i])
+    return bb_labeled
+
+
+def intersection_yolo(
+    bb_img_base: list[float | int], bb_img: list[float | int]
+) -> list[float | int] | int:
+    """
+    Intersection box of two bounding boxes in YOLO [x,y,w,h] format
+
+    Parameters:
+    :param bb_img_base: Bounding box of base image (full size)
+    :type bb_img_base: list[float|int]
+    :param bb_img: Bounding box of second image
+    :type bb_img: list[float|int]
+    :return: Intersected bounding box
+    :rtype: list[float|int]|int
+    """
     try:
         name, x, y, w, h = (
             bb_img[0],
@@ -69,10 +194,10 @@ def intersection_yolo(bb_base: list, bb_img: list):
             bb_img[4],
         )
         a_x, a_y, a_w, a_h = (
-            float(bb_base[0]),
-            float(bb_base[1]),
-            float(bb_base[2]),
-            float(bb_base[3]),
+            float(bb_img_base[0]),
+            float(bb_img_base[1]),
+            float(bb_img_base[2]),
+            float(bb_img_base[3]),
         )
         a_max_x = a_x + a_w / 2
         a_min_x = a_x - a_w / 2
@@ -105,35 +230,14 @@ def intersection_yolo(bb_base: list, bb_img: list):
     return [name, c_x, c_y, c_w, c_h]
 
 
-def get_img_names(results: list):
-    img_names = []
-    for r in results:
-        for c in r.boxes.cls:
-            img_names.append(int(c))
-    return img_names
+def to_matrix(list_to_convert: list, split_length: int):
+    return [
+        list_to_convert[i : i + split_length]
+        for i in range(0, len(list_to_convert), split_length)
+    ]
 
 
-def add_img_names_to_boxes(results: list, bounding_boxes: list):
-    img_names = get_img_names(results=results)
-    for i in range(len(bounding_boxes)):
-        bounding_boxes[i].insert(0, img_names[i])
-    return bounding_boxes
-
-
-def convert_box_txt_to_float(bounding_boxes_txt):
-    bounding_boxes_txt_converted = []
-    for box_txt in bounding_boxes_txt:
-        box_txt_converted = []
-        for item_txt in box_txt:
-            box_txt_converted.append([float(i) for i in item_txt])
-        bounding_boxes_txt_converted.append(box_txt_converted)
-    return bounding_boxes_txt_converted
-
-
-def get_img_sizes(img_input_path: str):
-    img_sizes = []
-    for file in sorted_alphanumeric(os.listdir(img_input_path)):
-        im = cv2.imread(img_input_path + file)
-        h, w, _ = im.shape
-        img_sizes.append([w, h])
-    return img_sizes
+def sorted_alphanumeric(data):
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]
+    return sorted(data, key=alphanum_key)
