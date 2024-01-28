@@ -2,19 +2,25 @@ import os
 
 from ultralytics import YOLO
 
-from definitions import (ARTICLES_ANALYZE_IMAGES_DIR,
-                         ARTICLES_ANALYZE_LABELS_DIR, PAGES_ANALYZE_IMAGES_DIR,
-                         PAGES_ANALYZE_LABELS_DIR)
-from scr.statistical_analysys.helpers import (add_img_names_to_boxes,
-                                              convert_bb_file_voc_to_yolo,
-                                              convert_bb_labeled_to_float,
-                                              get_img_sizes,
-                                              read_bounding_boxes,
-                                              sorted_alphanumeric)
-from scr.statistical_analysys.intersection_sorting import \
-    sort_boxes_intersection
+from definitions import (
+    ARTICLES_ANALYZE_IMAGES_DIR,
+    ARTICLES_ANALYZE_LABELS_DIR,
+    PAGES_ANALYZE_IMAGES_DIR,
+    PAGES_ANALYZE_LABELS_DIR,
+)
+from scr.statistical_analysys.helpers import (
+    add_img_names_to_boxes,
+    convert_bb_file_voc_to_yolo,
+    convert_bb_labeled_to_float,
+    get_img_sizes,
+    read_bounding_boxes,
+    sorted_alphanumeric,
+)
+from scr.statistical_analysys.intersection_sorting import sort_boxes_intersection
 from scr.statistical_analysys.percentages_calculation import (
-    calculate_areas_percentages, calculate_areas_percentages_sum)
+    calculate_areas_percentages,
+    calculate_areas_percentages_sum,
+)
 from scr.statistical_analysys.plot_functions import create_bar_plots
 
 

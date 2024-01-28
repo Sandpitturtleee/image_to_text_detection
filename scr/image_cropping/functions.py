@@ -2,15 +2,22 @@ import collections
 import os
 import shutil
 from pathlib import Path
+from pprint import pprint
 
 import cv2
 from pdf2image import convert_from_path
 from PIL import Image
 from ultralytics import YOLO
 
-from definitions import (ARTICLES_CROPPED_DIR, ARTICLES_DIR, NEWSPAPERS_DIR,
-                         PAGES_DIR, POPPLER_PATH, RESULTS_DIR)
-from scr.image_cropping.coordinate_sorting import coordinate_file_sorting
+from definitions import (
+    ARTICLES_CROPPED_DIR,
+    ARTICLES_DIR,
+    NEWSPAPERS_DIR,
+    PAGES_DIR,
+    POPPLER_PATH,
+    RESULTS_DIR,
+)
+from scr.image_cropping.coordinate_sorting import coordinate_file_sorting, get_img_sizes, sort_body_elements_in_article
 from scr.image_cropping.helpers import divide_bb_file_detected, add_img_names_to_boxes
 
 # pip install pdf2image
@@ -25,7 +32,9 @@ from scr.image_cropping.helpers import divide_bb_file_detected, add_img_names_to
 """
 
 
-def detect_and_crop_images_pages(model_name: str, input_folder: str, output_folder: str):
+def detect_and_crop_images_pages(
+    model_name: str, input_folder: str, output_folder: str
+):
     """
     Detect classes images and crop them to create new img files.
 
@@ -49,7 +58,10 @@ def detect_and_crop_images_pages(model_name: str, input_folder: str, output_fold
             output_folder=output_folder,
         )
 
-def detect_and_crop_images_articles(model_name: str, input_folder: str, output_folder: str):
+
+def detect_and_crop_images_articles(
+    model_name: str, input_folder: str, output_folder: str
+):
     """
     Detect classes images and crop them to create new img files.
 
@@ -63,51 +75,87 @@ def detect_and_crop_images_articles(model_name: str, input_folder: str, output_f
     """
     model = YOLO(model_name)
     names = model.names
+    img_sizes = get_img_sizes(
+        "/Users/sold/Desktop/Python/Projects/image_to_text_detection/database/detect/3_articles/"
+    )
+    print(img_sizes)
+    iterate = 0
     for file in os.listdir(input_folder):
         results = model(input_folder + file, device="mps")
         box = results[0].boxes.xyxy.tolist()
-        bb_file_detected = add_img_names_to_boxes(names=names,results=results, bb_labeled=box)
-        bb_file_detected_body, bb_file_detected_other = divide_bb_file_detected(bb_file_detected=bb_file_detected)
+        bb_file_detected = add_img_names_to_boxes(
+            names=names, results=results, bb_labeled=box
+        )
+        bb_file_detected_body, bb_file_detected_other = divide_bb_file_detected(
+            bb_file_detected=bb_file_detected
+        )
+        print(bb_file_detected_body)
 
-        classes_names_other = number_classes_names_other(bb_file_detected_other=bb_file_detected_other)
-        bb_file_detected_other = remove_classes_names_from_bb_file(bb_file_detected=bb_file_detected_other)
+
+        classes_names_other = number_classes_names_other(
+            bb_file_detected_other=bb_file_detected_other
+        )
+        bb_file_detected_other = remove_classes_names_from_bb_file(
+            bb_file_detected=bb_file_detected_other
+        )
+        # print(bb_file_detected_other)
+        # print(classes_names_other)
+
+        bb_file_detected_body = coordinate_file_sorting(
+            bb_file_detected_body=bb_file_detected_body,
+            img_width=img_sizes[iterate][0],
+            img_height=img_sizes[iterate][1],
+        )
+        print(bb_file_detected_body)
+        bb_file_detected_body = sort_body_elements_in_article(bb_file_detected_body=bb_file_detected_body)
+        print()
+        print(bb_file_detected_body)
         print(bb_file_detected_other)
-        print(classes_names_other)
 
-        bb_file_detected_body = coordinate_file_sorting(bb_file_detected_body=bb_file_detected_body)
 
+        #
         # bb_file_detected_body_names = numbering_classes_names(detected_classes=bb_file_detected_body)
         # print(bb_file_detected_body_names)
 
-        # crop_image(
-        #     file=file,
-        #     boxes=bb_file_detected_other,
-        #     detected_classes=classes_names_other,
-        #     input_folder=input_folder,
-        #     output_folder=output_folder,
-        # )
-        print(bb_file_detected_body)
+        crop_image(
+            file=file,
+            boxes=bb_file_detected_other,
+            detected_classes=classes_names_other,
+            input_folder=input_folder,
+            output_folder=output_folder,
+        )
+        iterate += 1
+
 
 def number_classes_names_other(bb_file_detected_other):
     bb_file_detected_names_retrieved = get_detected_classes_name_from_bb_file(
-        bb_file_detected_other=bb_file_detected_other)
-    bb_file_detected_other_names = numbering_classes_names(detected_classes=bb_file_detected_names_retrieved)
+        bb_file_detected_other=bb_file_detected_other
+    )
+    bb_file_detected_other_names = numbering_classes_names(
+        detected_classes=bb_file_detected_names_retrieved
+    )
     return bb_file_detected_other_names
+
 
 def remove_classes_names_from_bb_file(bb_file_detected):
     for bb_img_detected in bb_file_detected:
         bb_img_detected.pop(0)
     return bb_file_detected
+
+
 def get_detected_classes_name_from_bb_file(bb_file_detected_other):
     bb_img_detected_names_retrieved = []
     for bb_img_detected in bb_file_detected_other:
         bb_img_detected_names_retrieved.append(bb_img_detected[0])
     return bb_img_detected_names_retrieved
 
-def add_back_classes_to_bb_file(bb_file_detected_other_names,bb_file_detected_other):
+
+def add_back_classes_to_bb_file(bb_file_detected_other_names, bb_file_detected_other):
     for i in range(len(bb_file_detected_other)):
         bb_file_detected_other[i][0] = bb_file_detected_other_names[i]
     return bb_file_detected_other
+
+
 def crop_image(
     file: str,
     boxes: list,
@@ -144,7 +192,6 @@ def crop_image(
     image = input_folder + file
     img = cv2.imread(image)
     # Extract bounding boxes
-
 
     # Iterate through the bounding boxes
     for i, box in enumerate(boxes):
@@ -184,7 +231,6 @@ def get_cropped_images_names(model: YOLO, results: list) -> list:
     return detected_classes
 
 
-
 def numbering_classes_names(detected_classes: list) -> list:
     """
     Crops and saves an images with regard to detected bounding boxes.
@@ -220,7 +266,6 @@ def numbering_classes_names(detected_classes: list) -> list:
                 duplicate_number += 1
 
     return detected_classes
-
 
 
 def convert_pdf_to_images(pdf_name: str, first_page: int, last_page: int):
@@ -261,4 +306,3 @@ def clear_folders():
                     shutil.rmtree(file_path)
             except Exception as e:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
-

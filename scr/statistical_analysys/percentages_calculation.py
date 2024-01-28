@@ -1,5 +1,7 @@
 from scr.statistical_analysys.areas_calculation import (
-    calculate_bb_areas, calculate_file_areas_sum)
+    calculate_bb_areas,
+    calculate_file_areas_sum,
+)
 
 
 def calculate_areas_percentages(
