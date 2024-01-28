@@ -17,7 +17,11 @@ from definitions import (
     POPPLER_PATH,
     RESULTS_DIR,
 )
-from scr.image_cropping.coordinate_sorting import coordinate_file_sorting, get_img_sizes, sort_body_elements_in_article
+from scr.image_cropping.coordinate_sorting import (
+    coordinate_file_sorting,
+    get_img_sizes,
+    sort_body_elements_in_article,
+)
 from scr.image_cropping.helpers import divide_bb_file_detected, add_img_names_to_boxes
 
 # pip install pdf2image
@@ -101,14 +105,22 @@ def detect_and_crop_images_articles(
             img_width=img_sizes[iterate][0],
             img_height=img_sizes[iterate][1],
         )
-        bb_file_detected_body = sort_body_elements_in_article(bb_file_detected_body=bb_file_detected_body)
+        bb_file_detected_body = sort_body_elements_in_article(
+            bb_file_detected_body=bb_file_detected_body
+        )
 
-        classes_names_body = create_names_for_body(bb_file_detected_body=bb_file_detected_body)
+        classes_names_body = create_names_for_body(
+            bb_file_detected_body=bb_file_detected_body
+        )
 
         bb_file_detected_body = remove_classes_names_from_bb_file(
             bb_file_detected=bb_file_detected_body
         )
-        bb_file_detected_body = convert_yolo_to_coco(bb_file_detected_body=bb_file_detected_body, img_width=img_sizes[iterate][0], img_height=img_sizes[iterate][1])
+        bb_file_detected_body = convert_yolo_to_coco(
+            bb_file_detected_body=bb_file_detected_body,
+            img_width=img_sizes[iterate][0],
+            img_height=img_sizes[iterate][1],
+        )
 
         crop_image(
             file=file,
@@ -307,13 +319,15 @@ def clear_folders():
             except Exception as e:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
+
 def create_names_for_body(bb_file_detected_body):
     names = []
     for i in range(len(bb_file_detected_body)):
-        names.append("body_" + str(i+1))
+        names.append("body_" + str(i + 1))
     return names
 
-def convert_yolo_to_coco(bb_file_detected_body,img_width,img_height):
+
+def convert_yolo_to_coco(bb_file_detected_body, img_width, img_height):
     converted = []
     for item in bb_file_detected_body:
         center_x, center_y, width, height = item
@@ -321,5 +335,5 @@ def convert_yolo_to_coco(bb_file_detected_body,img_width,img_height):
         x2 = (center_x + width / 2) * img_width
         y1 = (center_y - height / 2) * img_height
         y2 = (center_y + height / 2) * img_height
-        converted.append([x1,y1,x2,y2])
+        converted.append([x1, y1, x2, y2])
     return converted

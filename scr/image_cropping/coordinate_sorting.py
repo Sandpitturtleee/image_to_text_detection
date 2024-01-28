@@ -28,8 +28,6 @@ def convert_bb_file_voc_to_yolo(
     :return: Bounding boxes in yolo format
     :rtype: list[list[float|int]]
     """
-    # img_sizes = get_img_sizes(
-    #     "/Users/sold/Desktop/Python/Projects/image_to_text_detection/database/detect/4_articles_cropped/")
     bb_file_voc_converted = []
     for bb_img_voc in bb_file_voc:
         bb_file_voc_converted.append(
@@ -120,6 +118,7 @@ def list_min_val(bb_file_detected_body):
     bb_file_detected_body.remove(min_val)
     return min_val
 
+
 def create_cols(bb_file_detected_body):
     xy_new = copy.deepcopy(bb_file_detected_body)
     xy_new1 = copy.deepcopy(bb_file_detected_body)
@@ -140,38 +139,27 @@ def create_cols(bb_file_detected_body):
     return cols
 
 
-def bubbleSort(array):
-    # loop through each element of array
-    for i in range(len(array)):
+def insertion_sort(arr):
+    # Traverse through 1 to len(arr)
+    for i in range(1, len(arr)):
+        key = arr[i]
 
-        # keep track of swapping
-        swapped = False
+        # Move elements of arr[0..i-1], that are
+        # greater than key, to one position ahead
+        # of their current position
+        j = i - 1
+        while j >= 0 and key[2] < arr[j][2]:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key
+    return arr
 
-        # loop to compare array elements
-        for j in range(0, len(array) - i - 1):
-
-            # compare two adjacent elements
-            # change > to < to sort in descending order
-            if array[j][2] > array[j + 1][2]:
-                # swapping occurs if elements
-                # are not in the intended order
-                temp = array[j][2]
-                array[j][2] = array[j + 1][2]
-                array[j + 1][2] = temp
-
-                swapped = True
-
-        # no swapping means the array is already sorted
-        # so no need for further comparison
-        if not swapped:
-            break
 
 def sort_body_elements_in_article(bb_file_detected_body):
     cols = create_cols(bb_file_detected_body=bb_file_detected_body)
-    # pprint(cols)
     sorted_item = []
     for item in cols:
-        bubbleSort(item)
+        insertion_sort(item)
         for item_nested in item:
             sorted_item.append(item_nested)
     return sorted_item
