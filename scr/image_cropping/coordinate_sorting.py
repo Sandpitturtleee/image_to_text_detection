@@ -169,7 +169,9 @@ def bubbleSort(array):
 def sort_body_elements_in_article(bb_file_detected_body):
     cols = create_cols(bb_file_detected_body=bb_file_detected_body)
     # pprint(cols)
+    sorted_item = []
     for item in cols:
-        sorted_item = []
         bubbleSort(item)
-    return cols
+        for item_nested in item:
+            sorted_item.append(item_nested)
+    return sorted_item

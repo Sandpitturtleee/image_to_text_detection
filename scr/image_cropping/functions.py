@@ -78,7 +78,6 @@ def detect_and_crop_images_articles(
     img_sizes = get_img_sizes(
         "/Users/sold/Desktop/Python/Projects/image_to_text_detection/database/detect/3_articles/"
     )
-    print(img_sizes)
     iterate = 0
     for file in os.listdir(input_folder):
         results = model(input_folder + file, device="mps")
@@ -89,8 +88,6 @@ def detect_and_crop_images_articles(
         bb_file_detected_body, bb_file_detected_other = divide_bb_file_detected(
             bb_file_detected=bb_file_detected
         )
-        print(bb_file_detected_body)
-
 
         classes_names_other = number_classes_names_other(
             bb_file_detected_other=bb_file_detected_other
@@ -98,29 +95,32 @@ def detect_and_crop_images_articles(
         bb_file_detected_other = remove_classes_names_from_bb_file(
             bb_file_detected=bb_file_detected_other
         )
-        # print(bb_file_detected_other)
-        # print(classes_names_other)
 
         bb_file_detected_body = coordinate_file_sorting(
             bb_file_detected_body=bb_file_detected_body,
             img_width=img_sizes[iterate][0],
             img_height=img_sizes[iterate][1],
         )
-        print(bb_file_detected_body)
         bb_file_detected_body = sort_body_elements_in_article(bb_file_detected_body=bb_file_detected_body)
-        print()
-        print(bb_file_detected_body)
-        print(bb_file_detected_other)
 
+        classes_names_body = create_names_for_body(bb_file_detected_body=bb_file_detected_body)
 
-        #
-        # bb_file_detected_body_names = numbering_classes_names(detected_classes=bb_file_detected_body)
-        # print(bb_file_detected_body_names)
+        bb_file_detected_body = remove_classes_names_from_bb_file(
+            bb_file_detected=bb_file_detected_body
+        )
+        bb_file_detected_body = convert_yolo_to_coco(bb_file_detected_body=bb_file_detected_body, img_width=img_sizes[iterate][0], img_height=img_sizes[iterate][1])
 
         crop_image(
             file=file,
             boxes=bb_file_detected_other,
             detected_classes=classes_names_other,
+            input_folder=input_folder,
+            output_folder=output_folder,
+        )
+        crop_image(
+            file=file,
+            boxes=bb_file_detected_body,
+            detected_classes=classes_names_body,
             input_folder=input_folder,
             output_folder=output_folder,
         )
@@ -306,3 +306,20 @@ def clear_folders():
                     shutil.rmtree(file_path)
             except Exception as e:
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
+
+def create_names_for_body(bb_file_detected_body):
+    names = []
+    for i in range(len(bb_file_detected_body)):
+        names.append("body_" + str(i+1))
+    return names
+
+def convert_yolo_to_coco(bb_file_detected_body,img_width,img_height):
+    converted = []
+    for item in bb_file_detected_body:
+        center_x, center_y, width, height = item
+        x1 = (center_x - width / 2) * img_width
+        x2 = (center_x + width / 2) * img_width
+        y1 = (center_y - height / 2) * img_height
+        y2 = (center_y + height / 2) * img_height
+        converted.append([x1,y1,x2,y2])
+    return converted
