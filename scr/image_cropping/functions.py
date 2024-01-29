@@ -7,6 +7,7 @@ from pprint import pprint
 import cv2
 from pdf2image import convert_from_path
 from PIL import Image
+from pdf2image.exceptions import PDFPageCountError
 from ultralytics import YOLO
 
 from definitions import (
@@ -15,7 +16,7 @@ from definitions import (
     NEWSPAPERS_DIR,
     PAGES_DIR,
     POPPLER_PATH,
-    RESULTS_DIR,
+    RESULTS_DIR, NEWSPAPERS_CROP_DIR,
 )
 from scr.image_cropping.coordinate_sorting import (
     coordinate_file_sorting,
@@ -35,6 +36,20 @@ from scr.image_cropping.helpers import divide_bb_file_detected, add_img_names_to
     A file containing functions that are used to detect objects on images an crop them into new images
 """
 
+def cropping():
+    clear_folders()
+    for file in os.listdir(NEWSPAPERS_CROP_DIR):
+        convert_pdf_to_images(pdf_name=file)
+        detect_and_crop_images_pages(
+            model_name="newspaper_best.pt",
+            input_folder=PAGES_DIR,
+            output_folder=ARTICLES_DIR,
+        )
+        detect_and_crop_images_articles(
+            model_name="article_best.pt",
+            input_folder=ARTICLES_DIR,
+            output_folder=ARTICLES_CROPPED_DIR,
+        )
 
 def detect_and_crop_images_pages(
     model_name: str, input_folder: str, output_folder: str
@@ -54,9 +69,10 @@ def detect_and_crop_images_pages(
     for file in os.listdir(input_folder):
         results = model(input_folder + file, device="mps")
         detected_classes = get_cropped_images_names(model=model, results=results)
+        box = results[0].boxes.xyxy.tolist()
         crop_image(
             file=file,
-            results=results,
+            boxes=box,
             detected_classes=detected_classes,
             input_folder=input_folder,
             output_folder=output_folder,
@@ -86,9 +102,11 @@ def detect_and_crop_images_articles(
     for file in os.listdir(input_folder):
         results = model(input_folder + file, device="mps")
         box = results[0].boxes.xyxy.tolist()
+
         bb_file_detected = add_img_names_to_boxes(
             names=names, results=results, bb_labeled=box
         )
+
         bb_file_detected_body, bb_file_detected_other = divide_bb_file_detected(
             bb_file_detected=bb_file_detected
         )
@@ -105,22 +123,23 @@ def detect_and_crop_images_articles(
             img_width=img_sizes[iterate][0],
             img_height=img_sizes[iterate][1],
         )
-        bb_file_detected_body = sort_body_elements_in_article(
-            bb_file_detected_body=bb_file_detected_body
-        )
-
         classes_names_body = create_names_for_body(
             bb_file_detected_body=bb_file_detected_body
         )
 
-        bb_file_detected_body = remove_classes_names_from_bb_file(
-            bb_file_detected=bb_file_detected_body
-        )
-        bb_file_detected_body = convert_yolo_to_coco(
-            bb_file_detected_body=bb_file_detected_body,
-            img_width=img_sizes[iterate][0],
-            img_height=img_sizes[iterate][1],
-        )
+        if len(bb_file_detected_body) !=0:
+            bb_file_detected_body = sort_body_elements_in_article(
+                bb_file_detected_body=bb_file_detected_body
+            )
+
+            bb_file_detected_body = remove_classes_names_from_bb_file(
+                bb_file_detected=bb_file_detected_body
+            )
+            bb_file_detected_body = convert_yolo_to_coco(
+                bb_file_detected_body=bb_file_detected_body,
+                img_width=img_sizes[iterate][0],
+                img_height=img_sizes[iterate][1],
+            )
 
         crop_image(
             file=file,
@@ -280,7 +299,7 @@ def numbering_classes_names(detected_classes: list) -> list:
     return detected_classes
 
 
-def convert_pdf_to_images(pdf_name: str, first_page: int, last_page: int):
+def convert_pdf_to_images(pdf_name: str):
     """
     Converts a document in a pdf format to multiple png images corresponding to 2_pages
 
@@ -292,15 +311,17 @@ def convert_pdf_to_images(pdf_name: str, first_page: int, last_page: int):
     :param last_page: Last page of a PDF file to where you want to start converting.
     :type last_page: int
     """
-    pages = convert_from_path(
-        NEWSPAPERS_DIR + pdf_name,
-        poppler_path=POPPLER_PATH,
-        first_page=first_page,
-        last_page=last_page,
-    )
-    pdf_name = Path(NEWSPAPERS_DIR + pdf_name).stem
-    for i in range(len(pages)):
-        pages[i].save(f"{PAGES_DIR}{pdf_name}_page_{str(i)}.png", "PNG")
+    try:
+        pages = convert_from_path(
+            NEWSPAPERS_DIR + pdf_name,
+            poppler_path=POPPLER_PATH,
+        )
+        pdf_name = Path(NEWSPAPERS_DIR + pdf_name).stem
+        for i in range(len(pages)):
+            pages[i].save(f"{PAGES_DIR}{pdf_name}_page_{str(i)}.png", "PNG")
+    except PDFPageCountError:
+        print(".DS_Store")
+
 
 
 def clear_folders():

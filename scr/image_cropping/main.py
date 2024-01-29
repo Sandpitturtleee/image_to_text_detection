@@ -10,33 +10,9 @@ from scr.image_cropping.functions import (
     clear_folders,
     convert_pdf_to_images,
     detect_and_crop_images_pages,
-    detect_and_crop_images_articles,
+    detect_and_crop_images_articles, cropping,
 )
 
 if __name__ == "__main__":
     print("START")
-    # clear_folders()
-    # convert_pdf_to_images(pdf_name="1.pdf", first_page=5, last_page=6)
-    # detect_and_crop_images_pages(
-    #     model_name="newspaper_best.pt",
-    #     input_folder=PAGES_DIR,
-    #     output_folder=ARTICLES_DIR,
-    # )
-    detect_and_crop_images_articles(
-        model_name="article_best.pt",
-        input_folder=ARTICLES_DIR,
-        output_folder=ARTICLES_CROPPED_DIR,
-    )
-
-    # bb = [[['body', 0.17432361598342344, 0.7993852906680589, 0.3290872140868856, 0.3847988249589112]], [['body', 0.51919450859807, 0.8850254201751621, 0.32889554220250655, 0.207435629896884], ['body', 0.5211139541288471, 0.4266076211627004, 0.33282580836410436, 0.47636316832616626]], [['body', 0.8470009214248035, 0.44628430237344086, 0.29744016138860596, 0.34518355663640354]]]
-    # sorted_item = []
-    # for item in bb:
-    #     print(item)
-    #
-    #     insertionSort(item)
-    #     for item_nested in item:
-    #         sorted_item.append(item_nested)
-    #
-    # print()
-    # for item in sorted_item:
-    #     print(item)
+    cropping()

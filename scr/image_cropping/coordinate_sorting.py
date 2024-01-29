@@ -123,6 +123,7 @@ def create_cols(bb_file_detected_body):
     xy_new = copy.deepcopy(bb_file_detected_body)
     xy_new1 = copy.deepcopy(bb_file_detected_body)
     cols = [[]]
+
     min_val = list_min_val(bb_file_detected_body=xy_new1)
     min_val_old = min_val
     col_iter = 0
@@ -136,6 +137,7 @@ def create_cols(bb_file_detected_body):
             col_iter += 1
             cols[col_iter].append(min_val)
         min_val_old = min_val
+
     return cols
 
 

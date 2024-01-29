@@ -26,3 +26,4 @@ ARTICLES_ANALYZE_IMAGES_DIR = (
 ARTICLES_ANALYZE_LABELS_DIR = (
     ROOT_DIR + "/database/analyze/Newspaper_articles/train/labels/"
 )
+NEWSPAPERS_CROP_DIR = ROOT_DIR + "/database/detect/1_newspapers/"
