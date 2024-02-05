@@ -16,7 +16,8 @@ from definitions import (
     NEWSPAPERS_DIR,
     PAGES_DIR,
     POPPLER_PATH,
-    RESULTS_DIR, NEWSPAPERS_CROP_DIR,
+    RESULTS_DIR,
+    NEWSPAPERS_CROP_DIR,
 )
 from scr.image_cropping.coordinate_sorting import (
     coordinate_file_sorting,
@@ -36,10 +37,11 @@ from scr.image_cropping.helpers import divide_bb_file_detected, add_img_names_to
     A file containing functions that are used to detect objects on images an crop them into new images
 """
 
+
 def cropping():
     clear_folders()
     for file in os.listdir(NEWSPAPERS_CROP_DIR):
-        convert_pdf_to_images(pdf_name=file)
+        convert_pdf_to_images(pdf_name=file, first_page=0, last_page=5)
         detect_and_crop_images_pages(
             model_name="newspaper_best.pt",
             input_folder=PAGES_DIR,
@@ -50,6 +52,7 @@ def cropping():
             input_folder=ARTICLES_DIR,
             output_folder=ARTICLES_CROPPED_DIR,
         )
+
 
 def detect_and_crop_images_pages(
     model_name: str, input_folder: str, output_folder: str
@@ -127,7 +130,7 @@ def detect_and_crop_images_articles(
             bb_file_detected_body=bb_file_detected_body
         )
 
-        if len(bb_file_detected_body) !=0:
+        if len(bb_file_detected_body) != 0:
             bb_file_detected_body = sort_body_elements_in_article(
                 bb_file_detected_body=bb_file_detected_body
             )
@@ -299,7 +302,7 @@ def numbering_classes_names(detected_classes: list) -> list:
     return detected_classes
 
 
-def convert_pdf_to_images(pdf_name: str):
+def convert_pdf_to_images(pdf_name: str, first_page: int, last_page: int):
     """
     Converts a document in a pdf format to multiple png images corresponding to 2_pages
 
@@ -315,13 +318,14 @@ def convert_pdf_to_images(pdf_name: str):
         pages = convert_from_path(
             NEWSPAPERS_DIR + pdf_name,
             poppler_path=POPPLER_PATH,
+            first_page=first_page,
+            last_page=last_page,
         )
         pdf_name = Path(NEWSPAPERS_DIR + pdf_name).stem
         for i in range(len(pages)):
             pages[i].save(f"{PAGES_DIR}{pdf_name}_page_{str(i)}.png", "PNG")
     except PDFPageCountError:
         print(".DS_Store")
-
 
 
 def clear_folders():

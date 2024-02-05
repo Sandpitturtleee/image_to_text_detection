@@ -10,7 +10,8 @@ from scr.image_cropping.functions import (
     clear_folders,
     convert_pdf_to_images,
     detect_and_crop_images_pages,
-    detect_and_crop_images_articles, cropping,
+    detect_and_crop_images_articles,
+    cropping,
 )
 
 if __name__ == "__main__":
