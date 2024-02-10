@@ -3,8 +3,34 @@ import shutil
 from os import listdir
 from os.path import isfile, join
 
-from definitions import RESULTS_DIR, NEWSPAPERS_DIR, PAGES_DIR, ARTICLES_DIR
 
+from definitions import RESULTS_DIR, NEWSPAPERS_DIR, PAGES_DIR, ARTICLES_DIR, ARTICLES_CROPPED_DIR
+
+def organizing():
+    print("Organizing")
+    create_newspaper_folders()
+    create_pages_folders()
+    create_articles_folders()
+    #create_results_txt_articles_folder()
+    move_files_to_folders()
+def move_files_to_folders():
+    file_names = get_file_names(folder_path=ARTICLES_CROPPED_DIR)
+    #file_names = ["2_page_3_article_4_author_1.png"]
+    for file in file_names:
+        n_number = get_newspaper_number(file=file)
+        p_number = get_page_number(file=file)
+        a_number = get_article_number(file=file)
+        folder_path = f"{RESULTS_DIR}{n_number}_newspaper/{p_number}_page/{a_number}_article/"
+        file_path = f"{ARTICLES_CROPPED_DIR}{file}"
+
+        # print(file_path)
+        # print(folder_path)
+        shutil.copyfile(file_path, folder_path+file)
+
+        # assert path == path_n
+        # print(n_number)
+        # print(p_number)
+        # print(a_number)
 
 def create_newspaper_folders():
     clear_folders()
@@ -61,6 +87,19 @@ def create_articles_folders():
                     path = os.path.join(sub_folder_p_path, nested_name) + "_article"
                     os.mkdir(path)
 
+def create_results_txt_articles_folder():
+    parent_dir = RESULTS_DIR
+    sub_folders_n = get_directory_names(folder_path=parent_dir)
+    for sub_folder_n in sub_folders_n:
+        sub_folder_n_path = os.path.join(RESULTS_DIR, sub_folder_n)
+        sub_folders_p = get_directory_names(folder_path=sub_folder_n_path)
+        for sub_folder_p in sub_folders_p:
+            sub_folder_p_path = os.path.join(sub_folder_n_path, sub_folder_p)
+            sub_folders_a = get_directory_names(folder_path=sub_folder_p_path)
+            for sub_folder_a in sub_folders_a:
+                sub_folder_a_path = os.path.join(sub_folder_p_path, sub_folder_a)
+                path = sub_folder_a_path + "/results_txt"
+                os.mkdir(path)
 
 def get_file_names(folder_path: str):
     try:
@@ -108,3 +147,23 @@ def remove_extension(files, extension):
         file = file[:-cut_length]
         new_files.append(file)
     return new_files
+
+def create_file_paths(file_names):
+    file_paths = []
+    for item in file_names:
+        file_paths.append(f"{ARTICLES_CROPPED_DIR+item}")
+    return file_paths
+
+def get_newspaper_number(file):
+    n_number = file.split("_")[0]
+    return n_number
+def get_page_number(file):
+    p_number = file.split("_", 2)[-1]
+    p_number = p_number.split("_", 1)[0]
+    return p_number
+
+def get_article_number(file):
+    a_number = file.split("_", 4)[-1]
+    a_number = a_number.split("_", 1)[0]
+    return a_number
+
