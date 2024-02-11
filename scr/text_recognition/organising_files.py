@@ -1,5 +1,6 @@
 import os
 import shutil
+import re
 from os import listdir
 from os.path import isfile, join
 
@@ -95,7 +96,7 @@ def create_results_txt_articles_folder():
 
 def get_file_names(folder_path: str):
     try:
-        only_files = [f for f in listdir(folder_path) if isfile(join(folder_path, f))]
+        only_files = [f for f in sorted_alphanumeric(listdir(folder_path)) if isfile(join(folder_path, f))]
         only_files.remove(".DS_Store")
     except ValueError:
         print(".Ds_Store not found")
@@ -159,3 +160,7 @@ def get_article_number(file):
     a_number = a_number.split("_", 1)[0]
     return a_number
 
+def sorted_alphanumeric(data):
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]
+    return sorted(data, key=alphanum_key)
