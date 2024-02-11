@@ -15,7 +15,6 @@ def organizing():
     move_files_to_folders()
 def move_files_to_folders():
     file_names = get_file_names(folder_path=ARTICLES_CROPPED_DIR)
-    #file_names = ["2_page_3_article_4_author_1.png"]
     for file in file_names:
         n_number = get_newspaper_number(file=file)
         p_number = get_page_number(file=file)
@@ -23,14 +22,7 @@ def move_files_to_folders():
         folder_path = f"{RESULTS_DIR}{n_number}_newspaper/{p_number}_page/{a_number}_article/"
         file_path = f"{ARTICLES_CROPPED_DIR}{file}"
 
-        # print(file_path)
-        # print(folder_path)
         shutil.copyfile(file_path, folder_path+file)
-
-        # assert path == path_n
-        # print(n_number)
-        # print(p_number)
-        # print(a_number)
 
 def create_newspaper_folders():
     clear_folders()
@@ -148,10 +140,10 @@ def remove_extension(files, extension):
         new_files.append(file)
     return new_files
 
-def create_file_paths(file_names):
+def create_file_paths(file_names,folder_path):
     file_paths = []
     for item in file_names:
-        file_paths.append(f"{ARTICLES_CROPPED_DIR+item}")
+        file_paths.append(f"{folder_path+item}")
     return file_paths
 
 def get_newspaper_number(file):
