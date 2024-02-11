@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 6
+names: ['author', 'body', 'caption', 'image', 'lead', 'title']
+
+roboflow:
+  workspace: engineering-degree
+  project: newspaper_articles
+  version: 4
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/engineering-degree/newspaper_articles/dataset/4
