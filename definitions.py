@@ -27,3 +27,6 @@ ARTICLES_ANALYZE_LABELS_DIR = (
     ROOT_DIR + "/database/analyze/Newspaper_articles/train/labels/"
 )
 NEWSPAPERS_CROP_DIR = ROOT_DIR + "/database/detect/1_newspapers/"
+
+DETECTED_TEXT = ROOT_DIR + "/database/analyze/Text_detection_results/Detected/"
+EXPECTED_TEXT = ROOT_DIR + "/database/analyze/Text_detection_results/Expected/"

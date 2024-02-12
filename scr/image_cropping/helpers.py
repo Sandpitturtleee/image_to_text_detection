@@ -10,9 +10,9 @@ def add_img_names_to_boxes(
     Ads classes numbers 0,1,2... detected for file image to bounding boxes
 
     Parameters:
-    :param results: Results for YOLO object detection on file
+    :param results: Expected for YOLO object detection on file
     :type results: list
-    :param bb_labeled: Results for YOLO object detection on file
+    :param bb_labeled: Expected for YOLO object detection on file
     :type bb_labeled: list[list[list[float]]]
     :return: A list with detected classes
     :rtype: list
@@ -28,7 +28,7 @@ def get_img_detected_classes(names: list, results: list) -> list:
     Gets classes numbers 0,1,2... detected for file image
 
     Parameters:
-    :param results: Results for YOLO object detection on file
+    :param results: Expected for YOLO object detection on file
     :type results: list
     :return: A list with detected classes
     :rtype: list
