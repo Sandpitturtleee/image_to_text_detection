@@ -5,13 +5,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from definitions import ARTICLES_CROPPED_DIR, ARTICLES_DIR, PAGES_DIR
-from scr.image_cropping.coordinate_sorting import list_min_val, create_cols
-from scr.image_cropping.functions import (
+from scr.image_cropping.coordinate_sorting import create_cols, list_min_val
+from scr.image_cropping.cropping import (
     clear_folders,
     convert_pdf_to_images,
-    detect_and_crop_images_pages,
-    detect_and_crop_images_articles,
     cropping,
+    detect_and_crop_images_articles,
+    detect_and_crop_images_pages,
 )
 
 if __name__ == "__main__":

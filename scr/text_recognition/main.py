@@ -2,22 +2,28 @@ import os
 from pathlib import Path
 
 import easyocr
+import keras_ocr
 from demo import recognize_text
 from matplotlib import pyplot as plt
 
 from definitions import ARTICLES_DIR, RESULTS_DIR
-
-
-import keras_ocr
-
 from scr.text_recognition.organising_files import (
+    create_articles_folders,
     create_newspaper_folders,
     create_pages_folders,
-    create_articles_folders, move_files_to_folders, create_results_txt_articles_folder, organizing,
+    create_results_txt_articles_folder,
+    move_files_to_folders,
+    organizing,
 )
-from scr.text_recognition.text_correction_symspell import word_segmentation_symspell, word_correction_symspell, \
-    word_segmentation_symspell1
-from scr.text_recognition.text_detection_easyocr import detect_text_easy_ocr, reformat_results
+from scr.text_recognition.text_correction_symspell import (
+    word_correction_symspell,
+    word_segmentation_symspell,
+    word_segmentation_symspell1,
+)
+from scr.text_recognition.text_detection_easyocr import (
+    detect_text_easy_ocr,
+    reformat_results,
+)
 from scr.text_recognition.text_detection_keras import detect_text_keras
 
 if __name__ == "__main__":

@@ -1,10 +1,11 @@
 import os
-import shutil
 import re
+import shutil
 from os import listdir
 from os.path import isfile, join
-from scipy.spatial.distance import hamming
 from pprint import pprint
+
+from scipy.spatial.distance import hamming
 
 from definitions import DETECTED_TEXT, EXPECTED_TEXT
 from scr.statistical_analysys.plot_functions import create_bar_plot
@@ -14,9 +15,7 @@ def analyze_text():
     article_percentages, percentages_list = analyze_percentages()
     print(article_percentages)
     for item in percentages_list:
-        create_bar_plot(
-            data=item, bin_edges=area_bin_edges, bin_labels=area_bin_labels
-        )
+        create_bar_plot(data=item, bin_edges=area_bin_edges, bin_labels=area_bin_labels)
 
 
 def analyze_percentages():
@@ -25,17 +24,20 @@ def analyze_percentages():
 
     # text_expected =["Doniesienia o kibolach bijących piłkarzy Legii, którzy ośmielili się przegrać z Lechem, szokują tylko niezorientowanych w realiach tzw. ekstraklasy."]
     # text_detected =["oniesienia 0 kibolach D bijących piłkarzy Lcgii; którzy ośmielili SIę przegrać z Lechem; szokują tyl ko niczoricntowanych w rcaliach tzw. ekstraklasy."]
-    #text_expected = ["Doniesienia o kibolach bijących piłkarzy Legii, którzy ośmielili się przegrać"]
-    #text_detected = ["oniesienia 0 0 0 0 0 0 0 kibolach D bijących piłkarzy Lcgii; którzy ośmielili SIę przegrać"]
+    # text_expected = ["Doniesienia o kibolach bijących piłkarzy Legii, którzy ośmielili się przegrać"]
+    # text_detected = ["oniesienia 0 0 0 0 0 0 0 kibolach D bijących piłkarzy Lcgii; którzy ośmielili SIę przegrać"]
     # text_expected = ["Dziś pierwsze urodziny tego symbolu kobiecej siły i siostrzeństwa ponad podziałami - ubiegłego 3 października powstrzymałyśmy rząd przed wprowadzeniem całkowitego zakazu aborcji."]
     # text_detected = ["ziśpierwszeurodzinyte D go symbolukobicccj siły isiostrzenstwa ponadpodziałami -ubiegłego 3 października powstrzymałyśmy rządprzcd wprowadzeniem całkowitego zakazu aborcji."]
 
     converted_detected = create_list_of_words(text=text_detected)
     converted_expected = create_list_of_words(text=text_expected)
 
-    article_percentages, percentages_list = word_matching(text_expected=converted_expected,
-                                                          text_detected=converted_detected, word_threshold=0.75,
-                                                          search_depth=10)
+    article_percentages, percentages_list = word_matching(
+        text_expected=converted_expected,
+        text_detected=converted_detected,
+        word_threshold=0.75,
+        search_depth=10,
+    )
     return article_percentages, percentages_list
 
 
@@ -43,15 +45,22 @@ def word_matching(text_expected, text_detected, word_threshold, search_depth):
     article_percentages = []
     percentages_list = []
     for e, d in zip(text_expected, text_detected):
-        article_percentage, percentages = word_matching_article(expected=e, detected=d, word_threshold=word_threshold,
-                                                                search_depth=search_depth, min_word_lenght=4)
+        article_percentage, percentages = word_matching_article(
+            expected=e,
+            detected=d,
+            word_threshold=word_threshold,
+            search_depth=search_depth,
+            min_word_lenght=4,
+        )
         article_percentages.append(article_percentage)
         percentages_list.append(percentages)
     return article_percentages, percentages_list
 
 
-def word_matching_article(expected, detected, word_threshold, search_depth, min_word_lenght):
-    not_detected_streak,matching_words,last_word_index = 0, 0, 0
+def word_matching_article(
+    expected, detected, word_threshold, search_depth, min_word_lenght
+):
+    not_detected_streak, matching_words, last_word_index = 0, 0, 0
     search_depth_original = search_depth
     percentages = []
     for i in range(len(expected)):
@@ -59,7 +68,9 @@ def word_matching_article(expected, detected, word_threshold, search_depth, min_
         percentages_nested = []
         try:
             for j in range(len(detected)):
-                percentage = match_word_percentage(e=expected[i], d=detected[j + last_word_index])
+                percentage = match_word_percentage(
+                    e=expected[i], d=detected[j + last_word_index]
+                )
                 percentages_nested.append(percentage)
                 depth += 1
                 not_detected_streak += 1
@@ -77,7 +88,9 @@ def word_matching_article(expected, detected, word_threshold, search_depth, min_
         except IndexError:
             pass
         percentages.append(max(percentages_nested))
-    percentage = matching_words / get_number_of_long_words(list_name=expected, length=min_word_lenght)
+    percentage = matching_words / get_number_of_long_words(
+        list_name=expected, length=min_word_lenght
+    )
     return percentage, percentages
 
 
@@ -122,7 +135,9 @@ def compare_length(detected, expected):
 
 def read_files_detected(path):
     file_names_detected = get_file_names(folder_path=path)
-    file_paths_detected = create_file_paths(file_names=file_names_detected, folder_path=path)
+    file_paths_detected = create_file_paths(
+        file_names=file_names_detected, folder_path=path
+    )
     text = []
     for file in file_paths_detected:
         text.append(read_txt_to_str(path=file))
@@ -130,14 +145,18 @@ def read_files_detected(path):
 
 
 def read_txt_to_str(path):
-    with open(path, 'r') as file:
+    with open(path, "r") as file:
         data = file.read().rstrip()
     return data
 
 
 def get_file_names(folder_path: str):
     try:
-        only_files = [f for f in sorted_alphanumeric(listdir(folder_path)) if isfile(join(folder_path, f))]
+        only_files = [
+            f
+            for f in sorted_alphanumeric(listdir(folder_path))
+            if isfile(join(folder_path, f))
+        ]
         only_files.remove(".DS_Store")
     except ValueError:
         print(".Ds_Store not found")
@@ -172,6 +191,7 @@ def create_occurrences(word):
         occurrences.append(word.count(item))
     dictionary = dict(zip(unique, occurrences))
     return dictionary
+
 
 area_bin_edges = [
     0.05,

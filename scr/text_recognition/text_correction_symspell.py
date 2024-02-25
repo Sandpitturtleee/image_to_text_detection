@@ -2,6 +2,8 @@ import pkg_resources
 from symspellpy import SymSpell, Verbosity
 
 DICT_PATH = "/Users/sold/Desktop/Python/Projects/image_to_text_detection/scr/text_recognition/pl.txt"
+
+
 def word_segmentation_symspell(input_term):
     # Set max_dictionary_edit_distance to avoid spelling correction
     sym_spell = SymSpell(max_dictionary_edit_distance=0, prefix_length=7)
@@ -15,6 +17,7 @@ def word_segmentation_symspell(input_term):
     # input_term = "thequickbrownfoxjumpsoverthelazydog"
     result = sym_spell.word_segmentation(input_term)
     print(f"{result.corrected_string}, {result.distance_sum}, {result.log_prob_sum}")
+
 
 def word_segmentation_symspell1(input_term):
     my_list = input_term.split(" ")
@@ -31,7 +34,9 @@ def word_segmentation_symspell1(input_term):
     for item in my_list:
         print(item)
         result = sym_spell.word_segmentation(item)
-        print(f"{result.corrected_string}, {result.distance_sum}, {result.log_prob_sum}")
+        print(
+            f"{result.corrected_string}, {result.distance_sum}, {result.log_prob_sum}"
+        )
         print()
 
 

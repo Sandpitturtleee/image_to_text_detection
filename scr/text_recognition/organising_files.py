@@ -1,29 +1,40 @@
 import os
-import shutil
 import re
+import shutil
 from os import listdir
 from os.path import isfile, join
 
+from definitions import (
+    ARTICLES_CROPPED_DIR,
+    ARTICLES_DIR,
+    NEWSPAPERS_DIR,
+    PAGES_DIR,
+    RESULTS_DIR,
+)
 
-from definitions import RESULTS_DIR, NEWSPAPERS_DIR, PAGES_DIR, ARTICLES_DIR, ARTICLES_CROPPED_DIR
 
 def organizing():
     print("Organizing")
     create_newspaper_folders()
     create_pages_folders()
     create_articles_folders()
-    #create_results_txt_articles_folder()
+    # create_results_txt_articles_folder()
     move_files_to_folders()
+
+
 def move_files_to_folders():
     file_names = get_file_names(folder_path=ARTICLES_CROPPED_DIR)
     for file in file_names:
         n_number = get_newspaper_number(file=file)
         p_number = get_page_number(file=file)
         a_number = get_article_number(file=file)
-        folder_path = f"{RESULTS_DIR}{n_number}_newspaper/{p_number}_page/{a_number}_article/"
+        folder_path = (
+            f"{RESULTS_DIR}{n_number}_newspaper/{p_number}_page/{a_number}_article/"
+        )
         file_path = f"{ARTICLES_CROPPED_DIR}{file}"
 
-        shutil.copyfile(file_path, folder_path+file)
+        shutil.copyfile(file_path, folder_path + file)
+
 
 def create_newspaper_folders():
     clear_folders()
@@ -80,6 +91,7 @@ def create_articles_folders():
                     path = os.path.join(sub_folder_p_path, nested_name) + "_article"
                     os.mkdir(path)
 
+
 def create_results_txt_articles_folder():
     parent_dir = RESULTS_DIR
     sub_folders_n = get_directory_names(folder_path=parent_dir)
@@ -94,9 +106,14 @@ def create_results_txt_articles_folder():
                 path = sub_folder_a_path + "/results_txt"
                 os.mkdir(path)
 
+
 def get_file_names(folder_path: str):
     try:
-        only_files = [f for f in sorted_alphanumeric(listdir(folder_path)) if isfile(join(folder_path, f))]
+        only_files = [
+            f
+            for f in sorted_alphanumeric(listdir(folder_path))
+            if isfile(join(folder_path, f))
+        ]
         only_files.remove(".DS_Store")
     except ValueError:
         print(".Ds_Store not found")
@@ -141,24 +158,30 @@ def remove_extension(files, extension):
         new_files.append(file)
     return new_files
 
-def create_file_paths(file_names,folder_path):
+
+def create_file_paths(file_names, folder_path):
     file_paths = []
     for item in file_names:
         file_paths.append(f"{folder_path+item}")
     return file_paths
 
+
 def get_newspaper_number(file):
     n_number = file.split("_")[0]
     return n_number
+
+
 def get_page_number(file):
     p_number = file.split("_", 2)[-1]
     p_number = p_number.split("_", 1)[0]
     return p_number
 
+
 def get_article_number(file):
     a_number = file.split("_", 4)[-1]
     a_number = a_number.split("_", 1)[0]
     return a_number
+
 
 def sorted_alphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
