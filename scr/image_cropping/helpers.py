@@ -10,6 +10,8 @@ def add_img_names_to_boxes(
     Ads classes numbers 0,1,2... detected for file image to bounding boxes
 
     Parameters:
+    :param names: Names of files
+    :type names: list
     :param results: Expected for YOLO object detection on file
     :type results: list
     :param bb_labeled: Expected for YOLO object detection on file
@@ -28,6 +30,8 @@ def get_img_detected_classes(names: list, results: list) -> list:
     Gets classes numbers 0,1,2... detected for file image
 
     Parameters:
+    :param names: Names of files
+    :type names: list
     :param results: Expected for YOLO object detection on file
     :type results: list
     :return: A list with detected classes
@@ -44,6 +48,15 @@ def get_img_detected_classes(names: list, results: list) -> list:
 def divide_bb_file_detected(
     bb_file_detected: list[list[list[float | int]]],
 ) -> tuple[list[list[list[float | int]]], list[list[list[float | int]]]]:
+    """
+    Creates a two list of detected images divided by "body" and other types
+
+    Parameters:
+    :param bb_file_detected: A list o detected images
+    :type bb_file_detected: list[list[list[float | int]]]
+    :return: A list with detected classes
+    :rtype: tuple[list[list[list[float | int]]], list[list[list[float | int]]]]
+    """
     bb_img_detected_body = []
     bb_img_detected_other = []
     for bb_img_detected in bb_file_detected:
