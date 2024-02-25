@@ -20,7 +20,7 @@ from definitions import (
     RESULTS_DIR,
 )
 from scr.image_cropping.coordinate_sorting import (
-    coordinate_file_sorting,
+    convert_bb_file_voc_to_yolo,
     get_img_sizes,
     sort_body_elements_in_article,
 )
@@ -126,8 +126,8 @@ def detect_and_crop_images_articles(
             bb_file_detected=bb_file_detected_other
         )
 
-        bb_file_detected_body = coordinate_file_sorting(
-            bb_file_detected_body=bb_file_detected_body,
+        bb_file_detected_body = convert_bb_file_voc_to_yolo(
+            bb_file_voc=bb_file_detected_body,
             img_width=img_sizes[iterate][0],
             img_height=img_sizes[iterate][1],
         )
@@ -231,7 +231,7 @@ def number_classes_names_other(
 
 def remove_classes_names_from_bb_file(
     bb_file_detected: list[list[list[float | str]]],
-) -> list[list[list[float | str]]]:
+) -> list[float | int]:
     """
     Takes images with its classes names and bounding boxes and removes names.
 
@@ -239,7 +239,7 @@ def remove_classes_names_from_bb_file(
     :param bb_file_detected: List of images with its name and bounding boxes
     :type bb_file_detected: list[list[list[float | str]]]
     :return: A list of images with its bounding boxes without names
-    :rtype: list[list[list[float | str]]]
+    :rtype: list[float | int]
     """
     for bb_img_detected in bb_file_detected:
         bb_img_detected.pop(0)
@@ -367,14 +367,14 @@ def clear_folders():
 
 
 def create_names_for_body(
-    bb_file_detected_body: list[list[list[float | str]]],
+    bb_file_detected_body: list[list[float | int]],
 ) -> list[str]:
     """
-        Creates names for body image files with correct numbering
+    Creates names for body image files with correct numbering
 
-        Parameters:
-        :bb_file_detected_body: List of detected body images
-        :type bb_file_detected_body: list[list[list[float | str]]]
+    Parameters:
+    :bb_file_detected_body: List of detected body images
+    :type bb_file_detected_body: list[list[float | int]]
     :return: A list of names for new files with added numbers
     :rtype: list[str]
     """
@@ -396,9 +396,9 @@ def convert_yolo_to_coco(
         :bb_file_detected_body: List of detected body images
         :type bb_file_detected_body: list[list[list[float | str]]]
         :img_width: List of detected body images
-        :img_width: int
+        :type img_width: int
         :img_height: List of detected body images
-        :img_height: int
+        :type img_height: int
     :return: List of detected body images converted to coco format
     :rtype: list[str]
     """

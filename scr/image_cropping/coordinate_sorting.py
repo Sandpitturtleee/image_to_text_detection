@@ -2,14 +2,8 @@ import copy
 import os
 import re
 
+
 import cv2
-
-
-def coordinate_file_sorting(bb_file_detected_body, img_width, img_height):
-    bb_file_detected_body = convert_bb_file_voc_to_yolo(
-        bb_file_voc=bb_file_detected_body, img_width=img_width, img_height=img_height
-    )
-    return bb_file_detected_body
 
 
 def convert_bb_file_voc_to_yolo(
@@ -104,13 +98,16 @@ def get_img_sizes(folder_path: str) -> list[list[int]]:
     return img_sizes
 
 
-def sorted_alphanumeric(data):
-    convert = lambda text: int(text) if text.isdigit() else text.lower()
-    alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]
-    return sorted(data, key=alphanum_key)
+def list_min_val(bb_file_detected_body: list[list[float | int]]) -> list[float | int]:
+    """
+    Deletes from a list a body image that has the smallest item[1] value. And returns deleted item
 
-
-def list_min_val(bb_file_detected_body):
+    Parameters:
+    :bb_file_detected_body: List of detected body images
+    :type bb_file_detected_body: list[list[float | int]]
+    :return: Deleted item with the smallest value
+    :rtype: list[float | int]
+    """
     min_val = bb_file_detected_body[0]
     for item in bb_file_detected_body:
         if item[1] < min_val[1]:
@@ -119,7 +116,18 @@ def list_min_val(bb_file_detected_body):
     return min_val
 
 
-def create_cols(bb_file_detected_body):
+def create_cols(
+    bb_file_detected_body: list[list[float | int]],
+) -> list[list[float | int]]:
+    """
+    Creates columns reflecting typical newspaper layout
+
+    Parameters:
+    :bb_file_detected_body: List of detected body images
+    :type bb_file_detected_body: list[list[float | int]]
+    :return: Sorted elements
+    :rtype: list[list[float | int]]
+    """
     xy_new = copy.deepcopy(bb_file_detected_body)
     xy_new1 = copy.deepcopy(bb_file_detected_body)
     cols = [[]]
@@ -136,8 +144,32 @@ def create_cols(bb_file_detected_body):
             col_iter += 1
             cols[col_iter].append(min_val)
         min_val_old = min_val
-
     return cols
+
+
+def sort_body_elements_in_article(bb_file_detected_body: list[list[float | int]])->list[float | int]:
+    """
+    Sorts body text elements simulating a typical newspaper column layout, sorts elements inside created columns
+
+    Parameters:
+    :bb_file_detected_body: List of detected body images
+    :type bb_file_detected_body: list[list[float | int]]
+    :return: Sorted elements
+    :rtype: list[float | int]
+    """
+    cols = create_cols(bb_file_detected_body=bb_file_detected_body)
+    sorted_item = []
+    for item in cols:
+        insertion_sort(item)
+        for item_nested in item:
+            sorted_item.append(item_nested)
+    return sorted_item
+
+
+def sorted_alphanumeric(data):
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]
+    return sorted(data, key=alphanum_key)
 
 
 def insertion_sort(arr):
@@ -154,13 +186,3 @@ def insertion_sort(arr):
             j -= 1
         arr[j + 1] = key
     return arr
-
-
-def sort_body_elements_in_article(bb_file_detected_body):
-    cols = create_cols(bb_file_detected_body=bb_file_detected_body)
-    sorted_item = []
-    for item in cols:
-        insertion_sort(item)
-        for item_nested in item:
-            sorted_item.append(item_nested)
-    return sorted_item
