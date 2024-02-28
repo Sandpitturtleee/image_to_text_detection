@@ -13,16 +13,21 @@ from definitions import (
 )
 
 
-def organizing():
-    print("Organizing")
+def creating_folder_structure():
+    """
+        Gathering functions to create entire structure of folders
+    """
+    clear_folders()
     create_newspaper_folders()
     create_pages_folders()
     create_articles_folders()
-    # create_results_txt_articles_folder()
     move_files_to_folders()
 
 
 def move_files_to_folders():
+    """
+        Moving detected img files to correct place in a folder structure
+    """
     file_names = get_file_names(folder_path=ARTICLES_CROPPED_DIR)
     for file in file_names:
         n_number = get_newspaper_number(file=file)
@@ -37,10 +42,10 @@ def move_files_to_folders():
 
 
 def create_newspaper_folders():
-    clear_folders()
-
+    """
+        Create folders for newspapers
+    """
     file_names = get_file_names(folder_path=NEWSPAPERS_DIR)
-
     sub_folders_cut = remove_extension(files=file_names, extension="pdf")
     parent_dir = RESULTS_DIR
     for item in sub_folders_cut:
@@ -49,8 +54,10 @@ def create_newspaper_folders():
 
 
 def create_pages_folders():
+    """
+        Create folders for pages
+    """
     parent_dir = RESULTS_DIR
-
     file_names = get_file_names(folder_path=PAGES_DIR)
     file_names_cut = remove_extension(files=file_names, extension="png")
     sub_folders_n = get_directory_names(folder_path=parent_dir)
@@ -68,8 +75,10 @@ def create_pages_folders():
 
 
 def create_articles_folders():
+    """
+        Create folders for articles
+    """
     parent_dir = RESULTS_DIR
-
     file_names = get_file_names(folder_path=ARTICLES_DIR)
     file_names_cut = remove_extension(files=file_names, extension="png")
     sub_folders_n = get_directory_names(folder_path=parent_dir)
@@ -92,22 +101,20 @@ def create_articles_folders():
                     os.mkdir(path)
 
 
-def create_results_txt_articles_folder():
-    parent_dir = RESULTS_DIR
-    sub_folders_n = get_directory_names(folder_path=parent_dir)
-    for sub_folder_n in sub_folders_n:
-        sub_folder_n_path = os.path.join(RESULTS_DIR, sub_folder_n)
-        sub_folders_p = get_directory_names(folder_path=sub_folder_n_path)
-        for sub_folder_p in sub_folders_p:
-            sub_folder_p_path = os.path.join(sub_folder_n_path, sub_folder_p)
-            sub_folders_a = get_directory_names(folder_path=sub_folder_p_path)
-            for sub_folder_a in sub_folders_a:
-                sub_folder_a_path = os.path.join(sub_folder_p_path, sub_folder_a)
-                path = sub_folder_a_path + "/results_txt"
-                os.mkdir(path)
 
 
-def get_file_names(folder_path: str):
+
+def get_file_names(folder_path: str)->list:
+    """
+        Get names of the files in folders
+
+        Parameters:
+        :param folder_path: Path to folder
+        :type folder_path: str
+        :return: A list of files
+        :rtype: list
+    """
+    only_files = []
     try:
         only_files = [
             f
@@ -120,7 +127,17 @@ def get_file_names(folder_path: str):
     return only_files
 
 
-def get_directory_names(folder_path: str):
+def get_directory_names(folder_path: str)->list:
+    """
+        Get subdirectories in a directory
+
+        Parameters:
+        :param folder_path: Path to folder
+        :type folder_path: str
+        :return: A list of directories
+        :rtype: list
+    """
+    sub_folders = []
     try:
         sub_folders = [
             name
@@ -150,7 +167,18 @@ def clear_folders():
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
 
-def remove_extension(files, extension):
+def remove_extension(files: list, extension:str)->list:
+    """
+        Removes extensions ex: ".png" from file names list
+
+        Parameters:
+        :param files: A list of file names with extensions
+        :type files: list
+        :param extension: Extension
+        :type extension: str
+        :return: A list of files without extensions
+        :rtype: list
+    """
     cut_length = 1 + len(extension)
     new_files = []
     for file in files:
@@ -159,25 +187,63 @@ def remove_extension(files, extension):
     return new_files
 
 
-def create_file_paths(file_names, folder_path):
+def create_file_paths(file_names: list, folder_path: str)->list:
+    """
+        Removes extensions ex: ".png" from file names list
+
+        Parameters:
+        :param file_names: A list of file names
+        :type file_names: list
+        :param folder_path: Path to the folder
+        :type folder_path: str
+        :return: A list of file with their full paths
+        :rtype: list
+    """
     file_paths = []
     for item in file_names:
         file_paths.append(f"{folder_path+item}")
     return file_paths
 
 
-def get_newspaper_number(file):
+def get_newspaper_number(file: str)->str:
+    """
+        Gets number from a string corresponding to a newspaper
+
+        Parameters:s
+        :param file: Name of the file
+        :type file: list
+        :return: A newspaper number
+        :rtype: str
+    """
     n_number = file.split("_")[0]
     return n_number
 
 
-def get_page_number(file):
+def get_page_number(file: str)->str:
+    """
+        Gets number from a string corresponding to page
+
+        Parameters:s
+        :param file: Name of the file
+        :type file: list
+        :return: Page number
+        :rtype: str
+    """
     p_number = file.split("_", 2)[-1]
     p_number = p_number.split("_", 1)[0]
     return p_number
 
 
-def get_article_number(file):
+def get_article_number(file: str)->str:
+    """
+        Gets number from a string corresponding to an article
+
+        Parameters:s
+        :param file: Name of the file
+        :type file: list
+        :return: Article number
+        :rtype: str
+    """
     a_number = file.split("_", 4)[-1]
     a_number = a_number.split("_", 1)[0]
     return a_number
