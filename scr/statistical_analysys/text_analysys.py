@@ -9,7 +9,7 @@ from scr.statistical_analysys.plot_functions import create_bar_plot
 
 def analyze_text():
     """
-        Analyzes text matching percentage and creates plots for them
+    Analyzes text matching percentage and creates plots for them
     """
     article_percentages, percentages_list = analyze_percentages()
     print(article_percentages)
@@ -19,11 +19,11 @@ def analyze_text():
 
 def analyze_percentages() -> tuple[list, list]:
     """
-        Read text from txt files and create a list of percentages
+    Read text from txt files and create a list of percentages
 
-        Parameters:
-        :return: A tuple of list of percentages
-        :rtype: tuple[list,list]
+    Parameters:
+    :return: A tuple of list of percentages
+    :rtype: tuple[list,list]
     """
     text_expected = read_files_detected(path=EXPECTED_TEXT)
     text_detected = read_files_detected(path=DETECTED_TEXT)
@@ -39,22 +39,26 @@ def analyze_percentages() -> tuple[list, list]:
     return article_percentages, percentages_list
 
 
-def word_matching(text_expected: list[list[str]], text_detected: list[list[str]], word_threshold: float,
-                  search_depth: int) -> tuple[list, list]:
+def word_matching(
+    text_expected: list[list[str]],
+    text_detected: list[list[str]],
+    word_threshold: float,
+    search_depth: int,
+) -> tuple[list, list]:
     """
-        Creates tuple of lists of percentages for all txt files
+    Creates tuple of lists of percentages for all txt files
 
-        Parameters:
-        :param text_expected: Baseline text to compare to
-        :type text_expected: list[list[str]]
-        :param text_detected: Detected text
-        :type text_detected: list[list[str]]
-        :param word_threshold: Percentage threshold where a word is getting classified as recognised correctly
-        :type word_threshold: float
-        :param search_depth: Amount of steps made in algorythm in search of an appearance of a word in detected text
-        :type search_depth: int
-        :return: A tuple of list of percentages
-        :rtype: tuple[list,list]
+    Parameters:
+    :param text_expected: Baseline text to compare to
+    :type text_expected: list[list[str]]
+    :param text_detected: Detected text
+    :type text_detected: list[list[str]]
+    :param word_threshold: Percentage threshold where a word is getting classified as recognised correctly
+    :type word_threshold: float
+    :param search_depth: Amount of steps made in algorythm in search of an appearance of a word in detected text
+    :type search_depth: int
+    :return: A tuple of list of percentages
+    :rtype: tuple[list,list]
     """
     article_percentages = []
     percentages_list = []
@@ -72,25 +76,28 @@ def word_matching(text_expected: list[list[str]], text_detected: list[list[str]]
 
 
 def word_matching_article(
-        expected: list[list[str]], detected: list[list[str]], word_threshold: float, search_depth: int,
-        min_word_length: int
+    expected: list[list[str]],
+    detected: list[list[str]],
+    word_threshold: float,
+    search_depth: int,
+    min_word_length: int,
 ) -> tuple[float, list[float | Any]]:
     """
-        Creates tuple of lists of percentages for txt file in a single article
+    Creates tuple of lists of percentages for txt file in a single article
 
-        Parameters:
-        :param expected: Baseline text to compare to
-        :type expected: list[list[str]]
-        :param detected: Detected text
-        :type detected: list[list[str]]
-        :param word_threshold: Percentage threshold where a word is getting classified as recognised correctly
-        :type word_threshold: float
-        :param search_depth: Amount of steps made in algorythm in search of an appearance of a word in detected text
-        :type search_depth: int
-        :param min_word_length: Minimal length of a word to be accounted in statistics
-        :type min_word_length: int
-        :return: A tuple of list of percentages
-        :rtype: tuple[float, list[float | Any]]
+    Parameters:
+    :param expected: Baseline text to compare to
+    :type expected: list[list[str]]
+    :param detected: Detected text
+    :type detected: list[list[str]]
+    :param word_threshold: Percentage threshold where a word is getting classified as recognised correctly
+    :type word_threshold: float
+    :param search_depth: Amount of steps made in algorythm in search of an appearance of a word in detected text
+    :type search_depth: int
+    :param min_word_length: Minimal length of a word to be accounted in statistics
+    :type min_word_length: int
+    :return: A tuple of list of percentages
+    :rtype: tuple[float, list[float | Any]]
     """
     not_detected_streak, matching_words, last_word_index = 0, 0, 0
     search_depth_original = search_depth
@@ -128,15 +135,15 @@ def word_matching_article(
 
 def match_word_percentage(e: list[str], d: list[str]) -> float:
     """
-        Calculates % of words matching parts
+    Calculates % of words matching parts
 
-        Parameters:
-        :param e: Baseline text to compare to
-        :type e: list[str]
-        :param d: Detected text
-        :type d: list[str]
-        :return: Percentage as a float ex. 0.5
-        :rtype: float
+    Parameters:
+    :param e: Baseline text to compare to
+    :type e: list[str]
+    :param d: Detected text
+    :type d: list[str]
+    :return: Percentage as a float ex. 0.5
+    :rtype: float
     """
     e, d = add_string_parts(e=e, d=d)
     x = create_occurrences(word=e)
@@ -148,15 +155,15 @@ def match_word_percentage(e: list[str], d: list[str]) -> float:
 
 def add_string_parts(e: list[str], d: list[str]) -> tuple[list, list]:
     """
-        Add # to make two string matching in length for further processing
+    Add # to make two string matching in length for further processing
 
-        Parameters:
-        :param e: Baseline text to compare to
-        :type e: list[str]
-        :param d: Detected text
-        :type d: list[str]
-        :return: New strings with matching length
-        :rtype: float
+    Parameters:
+    :param e: Baseline text to compare to
+    :type e: list[str]
+    :param d: Detected text
+    :type d: list[str]
+    :return: New strings with matching length
+    :rtype: float
     """
     e_length = len(e)
     d_length = len(d)
@@ -171,13 +178,13 @@ def add_string_parts(e: list[str], d: list[str]) -> tuple[list, list]:
 
 def create_list_of_words(text: list[str]) -> list[list[str]]:
     """
-        Split text to single words
+    Split text to single words
 
-        Parameters:
-        :param text: Text
-        :type text: list[str]
-        :return: Text split by " " into words
-        :rtype: list[list[str]]
+    Parameters:
+    :param text: Text
+    :type text: list[str]
+    :return: Text split by " " into words
+    :rtype: list[list[str]]
     """
     result = []
     for item in text:
@@ -187,13 +194,13 @@ def create_list_of_words(text: list[str]) -> list[list[str]]:
 
 def read_files_detected(path: str) -> list[str]:
     """
-        Read multiple txt files to list
+    Read multiple txt files to list
 
-        Parameters:
-        :param path: Path to txt file
-        :type path: str
-        :return: Text read from multiple txt files
-        :rtype: list[str]
+    Parameters:
+    :param path: Path to txt file
+    :type path: str
+    :return: Text read from multiple txt files
+    :rtype: list[str]
     """
     file_names_detected = get_file_names(folder_path=path)
     file_paths_detected = create_file_paths(
@@ -207,13 +214,13 @@ def read_files_detected(path: str) -> list[str]:
 
 def read_txt_to_str(path: str) -> str:
     """
-        Read single txt file
+    Read single txt file
 
-        Parameters:
-        :param path: Path to txt file
-        :type path: str
-        :return: Text read from txt file
-        :rtype: str
+    Parameters:
+    :param path: Path to txt file
+    :type path: str
+    :return: Text read from txt file
+    :rtype: str
     """
     with open(path, "r") as file:
         data = file.read().rstrip()
@@ -222,13 +229,13 @@ def read_txt_to_str(path: str) -> str:
 
 def get_file_names(folder_path: str) -> list:
     """
-        Read single txt file
+    Read single txt file
 
-        Parameters:
-        :param folder_path: Path to folder
-        :type folder_path: str
-        :return: A list of files
-        :rtype: list
+    Parameters:
+    :param folder_path: Path to folder
+    :type folder_path: str
+    :return: A list of files
+    :rtype: list
     """
     only_files = []
     try:
@@ -243,17 +250,17 @@ def get_file_names(folder_path: str) -> list:
     return only_files
 
 
-def create_file_paths(file_names: list, folder_path: str)->list:
+def create_file_paths(file_names: list, folder_path: str) -> list:
     """
-        Creates path for files
+    Creates path for files
 
-        Parameters:
-        :param file_names: Names of files in a folder
-        :type file_names: list
-        :param folder_path: Path to folder
-        :type folder_path: str
-        :return: A list of file paths
-        :rtype: list
+    Parameters:
+    :param file_names: Names of files in a folder
+    :type file_names: list
+    :param folder_path: Path to folder
+    :type folder_path: str
+    :return: A list of file paths
+    :rtype: list
     """
     file_paths = []
     for item in file_names:
@@ -261,17 +268,17 @@ def create_file_paths(file_names: list, folder_path: str)->list:
     return file_paths
 
 
-def get_number_of_long_words(list_name: list, length: int)->int:
+def get_number_of_long_words(list_name: list, length: int) -> int:
     """
-        Creates path for files
+    Creates path for files
 
-        Parameters:
-        :param list_name: List with words
-        :type list_name: list
-        :param length: Length of a word
-        :type length: int
-        :return: Amount of words of desired length
-        :rtype: int
+    Parameters:
+    :param list_name: List with words
+    :type list_name: list
+    :param length: Length of a word
+    :type length: int
+    :return: Amount of words of desired length
+    :rtype: int
     """
     count = 0
     for item in list_name:
@@ -280,15 +287,15 @@ def get_number_of_long_words(list_name: list, length: int)->int:
     return count
 
 
-def create_occurrences(word: list) ->dict:
+def create_occurrences(word: list) -> dict:
     """
-        Creates dictionary of letters in a word with its occurrences
+    Creates dictionary of letters in a word with its occurrences
 
-        Parameters:
-        :param word: A word
-        :type word: list
-        :return: Dictionary
-        :rtype: dict
+    Parameters:
+    :param word: A word
+    :type word: list
+    :return: Dictionary
+    :rtype: dict
     """
     unique = list(set(word))
     occurrences = []

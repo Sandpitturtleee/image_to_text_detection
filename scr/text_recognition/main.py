@@ -4,12 +4,9 @@ from scr.text_recognition.organising_files import (
 
 from scr.text_recognition.text_detection_easyocr import (
     detect_text_easy_ocr,
-
 )
 
 if __name__ == "__main__":
     print()
     creating_folder_structure()
     detect_text_easy_ocr()
-
-

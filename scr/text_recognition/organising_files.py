@@ -15,7 +15,7 @@ from definitions import (
 
 def creating_folder_structure():
     """
-        Gathering functions to create entire structure of folders
+    Gathering functions to create entire structure of folders
     """
     clear_folders()
     create_newspaper_folders()
@@ -26,7 +26,7 @@ def creating_folder_structure():
 
 def move_files_to_folders():
     """
-        Moving detected img files to correct place in a folder structure
+    Moving detected img files to correct place in a folder structure
     """
     file_names = get_file_names(folder_path=ARTICLES_CROPPED_DIR)
     for file in file_names:
@@ -43,7 +43,7 @@ def move_files_to_folders():
 
 def create_newspaper_folders():
     """
-        Create folders for newspapers
+    Create folders for newspapers
     """
     file_names = get_file_names(folder_path=NEWSPAPERS_DIR)
     sub_folders_cut = remove_extension(files=file_names, extension="pdf")
@@ -55,7 +55,7 @@ def create_newspaper_folders():
 
 def create_pages_folders():
     """
-        Create folders for pages
+    Create folders for pages
     """
     parent_dir = RESULTS_DIR
     file_names = get_file_names(folder_path=PAGES_DIR)
@@ -76,7 +76,7 @@ def create_pages_folders():
 
 def create_articles_folders():
     """
-        Create folders for articles
+    Create folders for articles
     """
     parent_dir = RESULTS_DIR
     file_names = get_file_names(folder_path=ARTICLES_DIR)
@@ -101,18 +101,15 @@ def create_articles_folders():
                     os.mkdir(path)
 
 
-
-
-
-def get_file_names(folder_path: str)->list:
+def get_file_names(folder_path: str) -> list:
     """
-        Get names of the files in folders
+    Get names of the files in folders
 
-        Parameters:
-        :param folder_path: Path to folder
-        :type folder_path: str
-        :return: A list of files
-        :rtype: list
+    Parameters:
+    :param folder_path: Path to folder
+    :type folder_path: str
+    :return: A list of files
+    :rtype: list
     """
     only_files = []
     try:
@@ -127,15 +124,15 @@ def get_file_names(folder_path: str)->list:
     return only_files
 
 
-def get_directory_names(folder_path: str)->list:
+def get_directory_names(folder_path: str) -> list:
     """
-        Get subdirectories in a directory
+    Get subdirectories in a directory
 
-        Parameters:
-        :param folder_path: Path to folder
-        :type folder_path: str
-        :return: A list of directories
-        :rtype: list
+    Parameters:
+    :param folder_path: Path to folder
+    :type folder_path: str
+    :return: A list of directories
+    :rtype: list
     """
     sub_folders = []
     try:
@@ -167,17 +164,17 @@ def clear_folders():
                 print("Failed to delete %s. Reason: %s" % (file_path, e))
 
 
-def remove_extension(files: list, extension:str)->list:
+def remove_extension(files: list, extension: str) -> list:
     """
-        Removes extensions ex: ".png" from file names list
+    Removes extensions ex: ".png" from file names list
 
-        Parameters:
-        :param files: A list of file names with extensions
-        :type files: list
-        :param extension: Extension
-        :type extension: str
-        :return: A list of files without extensions
-        :rtype: list
+    Parameters:
+    :param files: A list of file names with extensions
+    :type files: list
+    :param extension: Extension
+    :type extension: str
+    :return: A list of files without extensions
+    :rtype: list
     """
     cut_length = 1 + len(extension)
     new_files = []
@@ -187,17 +184,17 @@ def remove_extension(files: list, extension:str)->list:
     return new_files
 
 
-def create_file_paths(file_names: list, folder_path: str)->list:
+def create_file_paths(file_names: list, folder_path: str) -> list:
     """
-        Removes extensions ex: ".png" from file names list
+    Removes extensions ex: ".png" from file names list
 
-        Parameters:
-        :param file_names: A list of file names
-        :type file_names: list
-        :param folder_path: Path to the folder
-        :type folder_path: str
-        :return: A list of file with their full paths
-        :rtype: list
+    Parameters:
+    :param file_names: A list of file names
+    :type file_names: list
+    :param folder_path: Path to the folder
+    :type folder_path: str
+    :return: A list of file with their full paths
+    :rtype: list
     """
     file_paths = []
     for item in file_names:
@@ -205,44 +202,44 @@ def create_file_paths(file_names: list, folder_path: str)->list:
     return file_paths
 
 
-def get_newspaper_number(file: str)->str:
+def get_newspaper_number(file: str) -> str:
     """
-        Gets number from a string corresponding to a newspaper
+    Gets number from a string corresponding to a newspaper
 
-        Parameters:s
-        :param file: Name of the file
-        :type file: list
-        :return: A newspaper number
-        :rtype: str
+    Parameters:s
+    :param file: Name of the file
+    :type file: list
+    :return: A newspaper number
+    :rtype: str
     """
     n_number = file.split("_")[0]
     return n_number
 
 
-def get_page_number(file: str)->str:
+def get_page_number(file: str) -> str:
     """
-        Gets number from a string corresponding to page
+    Gets number from a string corresponding to page
 
-        Parameters:s
-        :param file: Name of the file
-        :type file: list
-        :return: Page number
-        :rtype: str
+    Parameters:s
+    :param file: Name of the file
+    :type file: list
+    :return: Page number
+    :rtype: str
     """
     p_number = file.split("_", 2)[-1]
     p_number = p_number.split("_", 1)[0]
     return p_number
 
 
-def get_article_number(file: str)->str:
+def get_article_number(file: str) -> str:
     """
-        Gets number from a string corresponding to an article
+    Gets number from a string corresponding to an article
 
-        Parameters:s
-        :param file: Name of the file
-        :type file: list
-        :return: Article number
-        :rtype: str
+    Parameters:s
+    :param file: Name of the file
+    :type file: list
+    :return: Article number
+    :rtype: str
     """
     a_number = file.split("_", 4)[-1]
     a_number = a_number.split("_", 1)[0]

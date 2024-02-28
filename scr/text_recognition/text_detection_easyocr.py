@@ -11,7 +11,7 @@ from scr.text_recognition.organising_files import (
 
 def detect_text_easy_ocr():
     """
-        Detecting text using easy ocr
+    Detecting text using easy ocr
     """
     reader = easyocr.Reader(["pl"])
     parent_dir = RESULTS_DIR
@@ -29,7 +29,7 @@ def detect_text_easy_ocr():
 
 def detect_text_in_folder(folder_path, reader):
     """
-        Detecting text from images in a single folder
+    Detecting text from images in a single folder
     """
     folder_path = f"{folder_path}/"
     images = get_file_names(folder_path=folder_path)
@@ -45,15 +45,15 @@ def detect_text_in_folder(folder_path, reader):
     write_body_result_file(images_path=images_path, body_result=body_result)
 
 
-def remove_img_files(images: list)->list:
+def remove_img_files(images: list) -> list:
     """
-        remove images of a detected class "image" from images list
+    remove images of a detected class "image" from images list
 
-        Parameters:
-        :param images: A list of images
-        :type images: list
-        :return: A list of images with removed images of "image" detected class
-        :rtype: list
+    Parameters:
+    :param images: A list of images
+    :type images: list
+    :return: A list of images with removed images of "image" detected class
+    :rtype: list
     """
     for file in images:
         if "image" in file:
@@ -63,13 +63,13 @@ def remove_img_files(images: list)->list:
 
 def save_to_txt_file(path: str, detected_text: str):
     """
-        Create it and save detected text to a txt file
+    Create it and save detected text to a txt file
 
-        Parameters:
-        :param path: Path of the file
-        :type path: str
-        :param detected_text: Detected text
-        :type detected_text: str
+    Parameters:
+    :param path: Path of the file
+    :type path: str
+    :param detected_text: Detected text
+    :type detected_text: str
     """
     path = path[:-4] + ".txt"
     with open(path, "w") as text_file:
@@ -78,13 +78,13 @@ def save_to_txt_file(path: str, detected_text: str):
 
 def reformat_results(result: str) -> str:
     """
-        Reformat result, join detected strings
+    Reformat result, join detected strings
 
-        Parameters:
-        :param result: Txt result
-        :type result: str
-        :return: Reformatted result
-        :rtype: str
+    Parameters:
+    :param result: Txt result
+    :type result: str
+    :return: Reformatted result
+    :rtype: str
     """
     results_formatted = []
     for item in result:
@@ -99,13 +99,13 @@ def reformat_results(result: str) -> str:
 
 def write_body_result_file(images_path: list, body_result: list):
     """
-        Join and write results to txt file
+    Join and write results to txt file
 
-        Parameters:
-        :param images_path: Path to files
-        :type images_path: list
-        :param body_result: Txt result
-        :type body_result: list
+    Parameters:
+    :param images_path: Path to files
+    :type images_path: list
+    :param body_result: Txt result
+    :type body_result: list
     """
     if len(images_path) != 0:
         path = images_path[0]

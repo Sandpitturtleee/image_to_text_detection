@@ -147,7 +147,9 @@ def create_cols(
     return cols
 
 
-def sort_body_elements_in_article(bb_file_detected_body: list[list[float | int]])->list[float | int]:
+def sort_body_elements_in_article(
+    bb_file_detected_body: list[list[float | int]],
+) -> list[float | int]:
     """
     Sorts body text elements simulating a typical newspaper column layout, sorts elements inside created columns
 
