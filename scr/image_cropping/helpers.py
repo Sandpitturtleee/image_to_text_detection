@@ -1,7 +1,3 @@
-from typing import List, Tuple
-
-from ultralytics import YOLO
-
 
 def add_img_names_to_boxes(
     names: list, results: list, bb_labeled: list[list[list[float]]]

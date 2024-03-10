@@ -2,7 +2,6 @@ import collections
 import os
 import shutil
 from pathlib import Path
-from pprint import pprint
 
 import cv2
 from pdf2image import convert_from_path
