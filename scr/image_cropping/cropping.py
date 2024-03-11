@@ -6,7 +6,6 @@ from pathlib import Path
 import cv2
 from pdf2image import convert_from_path
 from pdf2image.exceptions import PDFPageCountError
-from PIL import Image
 from ultralytics import YOLO
 
 from definitions import (
